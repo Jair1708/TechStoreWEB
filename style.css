@@ -16,3 +16,8 @@ body { font-family: 'Inter', system-ui, sans-serif; }
 .tab-active { background-color: #f59e0b; color: white !important; }
 
 .slide-modal { transition: transform 0.7s ease; }
+
+input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
