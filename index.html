@@ -162,4 +162,58 @@
 
   <script src="app.js"></script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechStore 🔥</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-zinc-950 text-white">
+
+  <!-- HEADER -->
+  <header class="header">
+    <h1 class="logo">Tech<span>Store</span></h1>
+
+    <nav>
+      <button onclick="mostrarSeccion('inicio')">Inicio</button>
+      <button onclick="mostrarSeccion('catalogo')">Catálogo</button>
+    </nav>
+
+    <button onclick="toggleCart()" class="cart-btn">
+      🛒 <span id="cartCount">0</span>
+    </button>
+  </header>
+
+  <!-- INICIO -->
+  <section id="inicio" class="seccion">
+    <h2>Bienvenido a TechStore 🔥</h2>
+    <p>Los mejores gadgets de Colombia</p>
+    <button onclick="mostrarSeccion('catalogo')" class="btn">
+      Ver catálogo
+    </button>
+  </section>
+
+  <!-- CATÁLOGO -->
+  <section id="catalogo" class="seccion hidden">
+    <input id="searchInput" placeholder="Buscar productos..." class="search">
+
+    <div id="catalogoGrid" class="grid"></div>
+  </section>
+
+  <!-- CARRITO -->
+  <div id="carritoPanel" class="cart hidden">
+    <h2>Tu carrito</h2>
+    <div id="carritoItems"></div>
+    <p>Total: <span id="subtotal">$0</span></p>
+    <button onclick="comprarWhatsApp()" class="btn">Comprar por WhatsApp</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
 </html>
