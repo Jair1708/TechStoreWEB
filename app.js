@@ -18,7 +18,7 @@ function mostrarToast(mensaje) {
 }
 
 // ====================== SECCIONES ======================
-function mostrarSeccion(id) {
+window.mostrarSeccion = function(id) {
   document.querySelectorAll('.seccion').forEach(s => s.classList.add('hidden'));
   const el = document.getElementById(id);
   if (el) el.classList.remove('hidden');
@@ -87,7 +87,7 @@ function autoSlide() {
 // ====================== CATALOGO ======================
 let filtroActual = "Todos";
 
-function renderFiltros() {
+window.renderFiltros = function()
   const filtrosContainer = document.getElementById("filtros");
   if (!filtrosContainer) return;
   const categorias = ["Todos", ...new Set(productos.map(p => p.categoria))];
@@ -105,7 +105,7 @@ window.filtrarCategoria = function(categoria) {
   renderCatalogo();
 };
 
-function renderCatalogo() {
+window.renderCatalogo = function()
   const grid = document.getElementById("catalogoGrid");
   if (!grid) return;
   const search = document.getElementById("searchInput")?.value.toLowerCase() || "";
