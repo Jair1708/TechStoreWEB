@@ -9,6 +9,7 @@ let productos = JSON.parse(localStorage.getItem("productos")) || [
 ];
 
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+let adminLoggeado = false; // ⭐ VARIABLE DE SEGURIDAD
 
 // ====================== UTILIDADES ======================
 function saveData() {
@@ -293,7 +294,7 @@ window.comprarPorWhatsApp = function() {
   window.open(`https://wa.me/573248777231?text=${encodeURIComponent(mensaje)}`);
 };
 
-// ====================== LOGIN & ADMIN ======================
+// ====================== LOGIN & ADMIN - PROTEGIDO ⭐ ======================
 window.abrirLogin = function() {
   document.getElementById("loginBox").classList.remove("hidden");
 };
@@ -306,10 +307,12 @@ window.login = function() {
   const user = document.getElementById("user").value;
   const pass = document.getElementById("pass").value;
   
+  // ⭐ VALIDACIÓN DE CREDENCIALES
   if (user === "admin" && pass === "techstore2026") {
+    adminLoggeado = true; // ⭐ MARCAR COMO LOGGEADO
     cerrarLogin();
     document.getElementById("adminPanel").classList.remove("hidden");
-    renderAdmin();
+    renderAdmin(); // ⭐ SOLO SE LLENA DESPUÉS DEL LOGIN
     mostrarToast("✅ Bienvenido Admin");
   } else {
     mostrarToast("❌ Credenciales incorrectas");
@@ -317,10 +320,21 @@ window.login = function() {
 };
 
 window.cerrarAdmin = function() {
+  adminLoggeado = false; // ⭐ DESLOGGEARSE
   document.getElementById("adminPanel").classList.add("hidden");
+  // ⭐ VACIAR LOS DATOS DEL PANEL
+  document.getElementById("adminForm").innerHTML = "";
+  document.getElementById("listaAdmin").innerHTML = "";
+  document.getElementById("contadorAdmin").innerText = "0";
 };
 
 function renderAdmin() {
+  // ⭐ VERIFICAR QUE ESTÉ LOGGEADO
+  if (!adminLoggeado) {
+    mostrarToast("❌ Acceso denegado");
+    return;
+  }
+  
   const form = document.getElementById("adminForm");
   const lista = document.getElementById("listaAdmin");
   
@@ -354,6 +368,12 @@ function renderAdmin() {
 };
 
 window.agregarProducto = function() {
+  // ⭐ VERIFICAR ACCESO ANTES DE AGREGAR
+  if (!adminLoggeado) {
+    mostrarToast("❌ No tienes permiso");
+    return;
+  }
+  
   const nombre = document.getElementById("newNombre").value;
   const precio = parseInt(document.getElementById("newPrecio").value);
   const old = parseInt(document.getElementById("newOld").value);
@@ -384,6 +404,12 @@ window.agregarProducto = function() {
 };
 
 window.eliminarProducto = function(index) {
+  // ⭐ VERIFICAR ACCESO ANTES DE ELIMINAR
+  if (!adminLoggeado) {
+    mostrarToast("❌ No tienes permiso");
+    return;
+  }
+  
   if (confirm("¿Eliminar este producto?")) {
     productos.splice(index, 1);
     saveData();
@@ -413,7 +439,7 @@ function init() {
     searchInput.addEventListener("input", renderCatalogo);
   }
   
-  console.log('%c✅ TechStore 2026 funcionando al 100%', 'color:#ff5e00; font-weight:bold; font-size:16px');
+  console.log('%c✅ TechStore 2026 - Panel Admin Protegido', 'color:#ff5e00; font-weight:bold; font-size:16px');
 }
 
 window.addEventListener("load", init);
