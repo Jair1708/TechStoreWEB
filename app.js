@@ -104,7 +104,7 @@ function init() {
   console.log('%c✅ TechStore funcionando al 100%', 'color:#ff5e00; font-weight:bold');
 }
 
-window.onload = init;window.onload = init;
+window.onload = init;
 =======
 // ================= DATA =================
 let productos = JSON.parse(localStorage.getItem("productos")) || [
