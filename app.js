@@ -430,12 +430,15 @@ function init() {
   renderCatalogo();
   mostrarSeccion("inicio");
   
+  // NO LLAMAR A renderAdmin() - PROTEGIDO
+  // adminForm y listaAdmin permanecen VACÍOS
+  
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
     searchInput.addEventListener("input", renderCatalogo);
   }
   
-  console.log('%c✅ TechStore 2026 - Panel Admin PROTEGIDO', 'color:#ff5e00; font-weight:bold; font-size:16px');
+  console.log('%c✅ TechStore 2026 - Panel Admin PROTEGIDO 🔒', 'color:#ff5e00; font-weight:bold; font-size:16px');
 }
 
 window.addEventListener("load", init);
