@@ -11,6 +11,7 @@ let productos = JSON.parse(localStorage.getItem("productos")) || [
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let adminLoggeado = false;
 
+// ====================== UTILIDADES ======================
 function saveData() {
   localStorage.setItem("productos", JSON.stringify(productos));
   localStorage.setItem("carrito", JSON.stringify(carrito));
@@ -18,14 +19,17 @@ function saveData() {
 
 function mostrarToast(mensaje) {
   const toast = document.getElementById("toast");
+  if (!toast) return;
   document.getElementById("toastText").innerHTML = mensaje;
   toast.classList.remove("hidden");
   setTimeout(() => toast.classList.add("hidden"), 3000);
 }
 
+// ====================== SECCIONES ======================
 function mostrarSeccion(id) {
   document.querySelectorAll('.seccion').forEach(s => s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('hidden');
   if (id === 'catalogo') renderCatalogo();
 }
 
@@ -40,6 +44,7 @@ const sliderData = [
 function renderSlider() {
   const slidesContainer = document.getElementById("slides");
   const dotsContainer = document.getElementById("dots");
+  if (!slidesContainer || !dotsContainer) return;
   
   slidesContainer.innerHTML = sliderData.map((slide, i) => `
     <div class="slide bg-gradient-to-r ${slide.bg}">
@@ -66,7 +71,8 @@ function renderDots() {
 
 window.goToSlide = function(n) {
   currentSlide = n;
-  document.getElementById("slides").style.transform = `translateX(-${n * 100}%)`;
+  const slidesEl = document.getElementById("slides");
+  if (slidesEl) slidesEl.style.transform = `translateX(-${n * 100}%)`;
   renderDots();
 };
 
@@ -91,6 +97,7 @@ let filtroActual = "Todos";
 
 function renderFiltros() {
   const filtrosContainer = document.getElementById("filtros");
+  if (!filtrosContainer) return;
   const categorias = ["Todos", ...new Set(productos.map(p => p.categoria))];
   
   filtrosContainer.innerHTML = categorias.map(cat => `
@@ -108,6 +115,7 @@ window.filtrarCategoria = function(categoria) {
 
 function renderCatalogo() {
   const grid = document.getElementById("catalogoGrid");
+  if (!grid) return;
   const search = document.getElementById("searchInput")?.value.toLowerCase() || "";
   
   let filtrados = productos.filter(p => {
@@ -146,6 +154,7 @@ window.verProducto = function(id) {
   
   const modal = document.getElementById("modal");
   const content = document.getElementById("modalContent");
+  if (!modal || !content) return;
   
   content.innerHTML = `
     <div class="flex flex-col md:flex-row gap-8 p-8">
@@ -189,15 +198,18 @@ window.cerrarModal = function() {
 };
 
 window.cambiarImagenModal = function(i) {
-  const productosActual = productos.find(p => p.id === parseInt(document.querySelector("#modalContent h2").textContent.split(" ")[0]));
-  if (productosActual) {
-    document.getElementById("modalImage").src = productosActual.imgs[i];
+  const modalImage = document.getElementById("modalImage");
+  if (modalImage) {
+    const titulo = document.querySelector("#modalContent h2")?.textContent || "";
+    // no automatic cross-lookup to avoid errors, keep simple
+    modalImage.src = document.querySelectorAll("#modalContent img")[i]?.src || modalImage.src;
   }
 };
 
 // ====================== CARRITO ======================
 window.agregarAlCarrito = function(id) {
   const producto = productos.find(p => p.id === id);
+  if (!producto) return;
   const existe = carrito.find(p => p.id === id);
   
   if (existe) {
@@ -212,17 +224,19 @@ window.agregarAlCarrito = function(id) {
 };
 
 function actualizarCarrito() {
-  const total = carrito.reduce((a, p) => a + (p.cantidad), 0);
-  document.getElementById("cartCount").innerText = total;
+  const total = carrito.reduce((a, p) => a + (p.cantidad || 0), 0);
+  const cartCountEl = document.getElementById("cartCount");
+  if (cartCountEl) cartCountEl.innerText = total;
   
   const container = document.getElementById("carritoItems");
   let subtotal = 0;
   
+  if (!container) return;
   if (carrito.length === 0) {
     container.innerHTML = '<p class="text-center text-zinc-400 py-8">Tu carrito está vacío</p>';
   } else {
     container.innerHTML = carrito.map((p, i) => {
-      subtotal += p.precio * p.cantidad;
+      subtotal += p.precio * (p.cantidad || 0);
       return `
         <div class="bg-zinc-800 p-4 rounded-2xl">
           <div class="flex gap-4 mb-3">
@@ -245,7 +259,8 @@ function actualizarCarrito() {
     }).join("");
   }
   
-  document.getElementById("subtotal").innerText = "$" + subtotal.toLocaleString();
+  const subtotalEl = document.getElementById("subtotal");
+  if (subtotalEl) subtotalEl.innerText = "$" + subtotal.toLocaleString();
 }
 
 window.cambiarCantidad = function(index, cambio) {
@@ -269,7 +284,7 @@ window.eliminarDelCarrito = function(index) {
 
 window.toggleCart = function() {
   const panel = document.getElementById("carritoPanel");
-  panel.classList.toggle("translate-x-full");
+  if (panel) panel.classList.toggle("translate-x-full");
   actualizarCarrito();
 };
 
@@ -292,23 +307,27 @@ window.comprarPorWhatsApp = function() {
   window.open(`https://wa.me/573248777231?text=${encodeURIComponent(mensaje)}`);
 };
 
-// ====================== LOGIN & ADMIN ======================
+// ====================== LOGIN & ADMIN - PROTEGIDO ======================
 window.abrirLogin = function() {
-  document.getElementById("loginBox").classList.remove("hidden");
+  const box = document.getElementById("loginBox");
+  if (box) box.classList.remove("hidden");
 };
 
 window.cerrarLogin = function() {
-  document.getElementById("loginBox").classList.add("hidden");
+  const box = document.getElementById("loginBox");
+  if (box) box.classList.add("hidden");
 };
 
 window.login = function() {
-  const user = document.getElementById("user").value;
-  const pass = document.getElementById("pass").value;
+  const user = document.getElementById("user")?.value || "";
+  const pass = document.getElementById("pass")?.value || "";
   
+  // Credenciales: admin / techstore2026
   if (user === "admin" && pass === "techstore2026") {
     adminLoggeado = true;
     cerrarLogin();
-    document.getElementById("adminPanel").classList.remove("hidden");
+    const panel = document.getElementById("adminPanel");
+    if (panel) panel.classList.remove("hidden");
     renderAdmin();
     mostrarToast("✅ Bienvenido Admin");
   } else {
@@ -318,9 +337,14 @@ window.login = function() {
 
 window.cerrarAdmin = function() {
   adminLoggeado = false;
-  document.getElementById("adminPanel").classList.add("hidden");
-  document.getElementById("adminForm").innerHTML = "";
-  document.getElementById("listaAdmin").innerHTML = "";
+  const panel = document.getElementById("adminPanel");
+  if (panel) panel.classList.add("hidden");
+  const form = document.getElementById("adminForm");
+  const lista = document.getElementById("listaAdmin");
+  if (form) form.innerHTML = "";
+  if (lista) lista.innerHTML = "";
+  const contador = document.getElementById("contadorAdmin");
+  if (contador) contador.innerText = "0";
 };
 
 function renderAdmin() {
@@ -328,6 +352,7 @@ function renderAdmin() {
   
   const form = document.getElementById("adminForm");
   const lista = document.getElementById("listaAdmin");
+  if (!form || !lista) return;
   
   form.innerHTML = `
     <h3 class="text-2xl font-bold mb-6">Agregar Producto</h3>
@@ -342,7 +367,8 @@ function renderAdmin() {
     </button>
   `;
   
-  document.getElementById("contadorAdmin").innerText = productos.length;
+  const contador = document.getElementById("contadorAdmin");
+  if (contador) contador.innerText = productos.length;
   
   lista.innerHTML = productos.map((p, i) => `
     <div class="bg-zinc-800 p-4 rounded-xl flex justify-between items-start">
@@ -364,12 +390,12 @@ window.agregarProducto = function() {
     return;
   }
   
-  const nombre = document.getElementById("newNombre").value;
-  const precio = parseInt(document.getElementById("newPrecio").value);
-  const old = parseInt(document.getElementById("newOld").value);
-  const desc = document.getElementById("newDesc").value;
-  const cat = document.getElementById("newCat").value;
-  const img = document.getElementById("newImg").value;
+  const nombre = document.getElementById("newNombre")?.value || "";
+  const precio = parseInt(document.getElementById("newPrecio")?.value || "0");
+  const old = parseInt(document.getElementById("newOld")?.value || "0");
+  const desc = document.getElementById("newDesc")?.value || "";
+  const cat = document.getElementById("newCat")?.value || "";
+  const img = document.getElementById("newImg")?.value || "";
   
   if (!nombre || !precio || !old || !desc || !cat || !img) {
     mostrarToast("⚠️ Completa todos los campos");
@@ -377,7 +403,7 @@ window.agregarProducto = function() {
   }
   
   productos.push({
-    id: Math.max(...productos.map(p => p.id)) + 1,
+    id: productos.length ? Math.max(...productos.map(p => p.id)) + 1 : 1,
     nombre, precio, old, descripcion: desc, categoria: cat, imgs: [img]
   });
   
@@ -385,12 +411,8 @@ window.agregarProducto = function() {
   renderAdmin();
   mostrarToast("✅ Producto agregado");
   
-  document.getElementById("newNombre").value = "";
-  document.getElementById("newPrecio").value = "";
-  document.getElementById("newOld").value = "";
-  document.getElementById("newDesc").value = "";
-  document.getElementById("newCat").value = "";
-  document.getElementById("newImg").value = "";
+  const fields = ["newNombre","newPrecio","newOld","newDesc","newCat","newImg"];
+  fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
 };
 
 window.eliminarProducto = function(index) {
@@ -411,9 +433,8 @@ window.eliminarProducto = function(index) {
 window.toggleMobileMenu = function() {
   const menu = document.getElementById("mobileMenu");
   const icon = document.getElementById("mobileIcon");
-  menu.classList.toggle("hidden");
-  icon.classList.toggle("fa-bars");
-  icon.classList.toggle("fa-times");
+  if (menu) menu.classList.toggle("hidden");
+  if (icon) { icon.classList.toggle("fa-bars"); icon.classList.toggle("fa-times"); }
 };
 
 // ====================== INICIO ======================
@@ -423,8 +444,7 @@ function init() {
   renderCatalogo();
   mostrarSeccion("inicio");
   
-  // PANEL ADMIN COMPLETAMENTE PROTEGIDO - NO SE LLENA AL INICIAR
-  // Permanecerá vacío hasta que el usuario haga login
+  // PANEL ADMIN NO SE LLENA AL INICIAR. Solo con login.
   
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {

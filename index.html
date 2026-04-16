@@ -123,6 +123,7 @@
           <button onclick="cerrarAdmin()" class="text-4xl text-zinc-400 hover:text-white">×</button>
         </div>
         <div class="flex flex-1 overflow-hidden">
+          <!-- adminForm y listaAdmin intencionalmente VACÍOS hasta login -->
           <div class="w-full lg:w-5/12 p-8 border-r border-zinc-800 overflow-auto" id="adminForm"></div>
           <div class="flex-1 p-8 overflow-auto">
             <h3 class="font-semibold mb-6">Productos actuales (<span id="contadorAdmin">0</span>)</h3>
@@ -136,8 +137,8 @@
     <div id="loginBox" onclick="if(event.target.id==='loginBox')cerrarLogin()" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[400]">
       <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl p-10 w-full max-w-xs">
         <h2 class="text-3xl font-semibold mb-8 text-center">Acceso Admin</h2>
-        <input id="user" value="admin" class="w-full mb-4 px-6 py-5 bg-zinc-800 rounded-3xl text-white">
-        <input id="pass" type="password" value="techstore2026" class="w-full mb-8 px-6 py-5 bg-zinc-800 rounded-3xl text-white">
+        <input id="user" placeholder="Usuario" class="w-full mb-4 px-6 py-5 bg-zinc-800 rounded-3xl text-white">
+        <input id="pass" type="password" placeholder="Contraseña" class="w-full mb-8 px-6 py-5 bg-zinc-800 rounded-3xl text-white">
         <button onclick="login()" class="w-full py-5 bg-orange-600 hover:bg-orange-500 rounded-3xl text-xl font-semibold">ENTRAR</button>
       </div>
     </div>
