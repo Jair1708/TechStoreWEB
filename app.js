@@ -1,13 +1,5 @@
 // ====================== DATA ======================
-let productos = JSON.parse(localStorage.getItem("productos")) || [
-  { id:1, nombre:"Audífonos Bluetooth Pro", precio:59900, old:89900, descripcion:"Cancelación de ruido + 40 horas de batería", imgs:["https://picsum.photos/id/1015/800/800","https://picsum.photos/id/1016/800/800"], categoria:"Audio" },
-  { id:2, nombre:"Smartwatch Ultra 2", precio:149900, old:199900, descripcion:"Pantalla AMOLED + GPS + Monitoreo 24/7", imgs:["https://picsum.photos/id/201/800/800","https://picsum.photos/id/251/800/800"], categoria:"Wearables" },
-  { id:3, nombre:"Powerbank 30.000 mAh", precio:44900, old:69900, descripcion:"Carga rápida 65W + 3 puertos", imgs:["https://picsum.photos/id/870/800/800"], categoria:"Accesorios" },
-  { id:4, nombre:"Cámara Web 4K Pro", precio:89900, old:129900, descripcion:"4K + Auto focus + Micrófono HD", imgs:["https://picsum.photos/id/160/800/800"], categoria:"Accesorios" },
-  { id:5, nombre:"Teclado Mecánico RGB", precio:79900, old:109900, descripcion:"Switches blue + RGB personalizable", imgs:["https://picsum.photos/id/1005/800/800"], categoria:"Accesorios" },
-  { id:6, nombre:"Mouse Gamer Inalámbrico", precio:45900, old:69900, descripcion:"16000 DPI + Batería 60 horas", imgs:["https://picsum.photos/id/201/800/800"], categoria:"Accesorios" }
-];
-
+let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let adminLoggeado = false;
 
