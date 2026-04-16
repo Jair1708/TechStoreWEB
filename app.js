@@ -39,25 +39,25 @@ function mostrarToast(msg) {
 }
 
 // ====================== SECCIONES ======================
-function mostrarSeccion(id) {
+window.mostrarSeccion = function(id) {
   document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
   const el = document.getElementById(id);
   if (el) el.classList.remove("hidden");
 }
 
 // ====================== LOGIN ======================
-function abrirLogin() {
+window.abrirLogin = function() {
   adminLoggeado = !adminLoggeado;
   renderAdmin();
   mostrarToast(adminLoggeado ? "Admin activado" : "Admin desactivado");
 }
 
 // ====================== CARRITO ======================
-function toggleCart() {
+window.toggleCart = function() {
   alert("Carrito (demo)");
 }
 
-function agregarAlCarrito(index) {
+window.agregarAlCarrito = function(index) {
   carrito.push(productos[index]);
   saveCarrito();
   mostrarToast("Producto agregado");
@@ -80,7 +80,7 @@ function renderFiltros() {
   `).join("");
 }
 
-function filtrarCategoria(cat) {
+window.filtrarCategoria = function(cat) {
   filtroActual = cat;
   renderFiltros();
   renderCatalogo();
