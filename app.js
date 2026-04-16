@@ -11,7 +11,6 @@ let productos = JSON.parse(localStorage.getItem("productos")) || [
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let adminLoggeado = false;
 
-// ====================== UTILIDADES ======================
 function saveData() {
   localStorage.setItem("productos", JSON.stringify(productos));
   localStorage.setItem("carrito", JSON.stringify(carrito));
@@ -24,7 +23,6 @@ function mostrarToast(mensaje) {
   setTimeout(() => toast.classList.add("hidden"), 3000);
 }
 
-// ====================== SECCIONES ======================
 function mostrarSeccion(id) {
   document.querySelectorAll('.seccion').forEach(s => s.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
@@ -191,9 +189,9 @@ window.cerrarModal = function() {
 };
 
 window.cambiarImagenModal = function(i) {
-  const productos_actual = productos.find(p => p.id === parseInt(document.querySelector("#modalContent h2").textContent.split(" ")[0]));
-  if (productos_actual) {
-    document.getElementById("modalImage").src = productos_actual.imgs[i];
+  const productosActual = productos.find(p => p.id === parseInt(document.querySelector("#modalContent h2").textContent.split(" ")[0]));
+  if (productosActual) {
+    document.getElementById("modalImage").src = productosActual.imgs[i];
   }
 };
 
@@ -294,7 +292,7 @@ window.comprarPorWhatsApp = function() {
   window.open(`https://wa.me/573248777231?text=${encodeURIComponent(mensaje)}`);
 };
 
-// ====================== LOGIN & ADMIN - ⭐ PROTEGIDO ======================
+// ====================== LOGIN & ADMIN ======================
 window.abrirLogin = function() {
   document.getElementById("loginBox").classList.remove("hidden");
 };
@@ -321,17 +319,12 @@ window.login = function() {
 window.cerrarAdmin = function() {
   adminLoggeado = false;
   document.getElementById("adminPanel").classList.add("hidden");
-  // VACIAR COMPLETAMENTE
   document.getElementById("adminForm").innerHTML = "";
   document.getElementById("listaAdmin").innerHTML = "";
 };
 
-// ⭐ SOLO SE LLENA SI ESTÁ LOGGEADO
 function renderAdmin() {
-  if (!adminLoggeado) {
-    mostrarToast("❌ Acceso denegado");
-    return;
-  }
+  if (!adminLoggeado) return;
   
   const form = document.getElementById("adminForm");
   const lista = document.getElementById("listaAdmin");
@@ -430,8 +423,8 @@ function init() {
   renderCatalogo();
   mostrarSeccion("inicio");
   
-  // NO LLAMAR A renderAdmin() - PROTEGIDO
-  // adminForm y listaAdmin permanecen VACÍOS
+  // PANEL ADMIN COMPLETAMENTE PROTEGIDO - NO SE LLENA AL INICIAR
+  // Permanecerá vacío hasta que el usuario haga login
   
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
