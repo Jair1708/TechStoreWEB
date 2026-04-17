@@ -2,55 +2,38 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="TechStore Colombia • Gadgets premium con envío gratis y pago contra entrega">
-  <title>TechStore 🔥 | Gadgets Premium Colombia</title>
+  <title>TechStore 🔥</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-zinc-950 text-white font-sans">
+<body class="bg-black text-white">
 
-<!-- TODO TU CONTENIDO (NO CAMBIA NADA ARRIBA) -->
+<h1 class="text-3xl p-4">TechStore 🔥</h1>
 
-<!-- FIREBASE (SIN STORAGE) -->
+<button onclick="mostrarSeccion('inicio')">Inicio</button>
+<button onclick="mostrarSeccion('admin')">Admin</button>
+
+<section id="inicio" class="seccion p-4">
+  <h2>Productos</h2>
+  <div id="catalogo"></div>
+</section>
+
+<section id="admin" class="seccion hidden p-4">
+  <h2>Subir producto</h2>
+  <input id="nombre" placeholder="Nombre"><br>
+  <input id="precio" type="number" placeholder="Precio"><br>
+  <input id="file" type="file"><br><br>
+  <button onclick="subir()">SUBIR</button>
+</section>
+
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } 
-    from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-  import { getAuth, signInWithEmailAndPassword, signOut } 
-    from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDTykDD5yoVBzBXjocM0CrkI6Ps2jsUz10",
-    authDomain: "techstore-f79a2.firebaseapp.com",
-    projectId: "techstore-f79a2",
-    storageBucket: "techstore-f79a2.firebasestorage.app",
-    messagingSenderId: "391504606305",
-    appId: "1:391504606305:web:80beb005037d6d2afa2620"
-  };
+const supabase = createClient(
+  'https://dlzerjvbqixllkkralfz.supabase.co',
+  'sb_publishable_GkqUQZEVHZlKuae4szSlYQ_n3y9EgPN'
+)
 
-  const app = initializeApp(firebaseConfig);
-  window.db = getFirestore(app);
-  window.auth = getAuth(app);
-
-  // 🔥 SIN STORAGE
-  window.fb = { 
-    collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy,
-    signInWithEmailAndPassword, signOut 
-  };
-</script>
-
-<!-- SUPABASE -->
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-  const supabase = createClient(
-    'https://dlzerjvbqixllkkralfz.supabase.co',
-    'sb_publishable_GkqUQZEVHZlKuae4szSlYQ_n3y9EgPN'
-  )
-
-  window.supabase = supabase
+window.supabase = supabase
 </script>
 
 <script src="app.js"></script>
