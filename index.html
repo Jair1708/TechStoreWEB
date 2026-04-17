@@ -11,24 +11,41 @@
 </head>
 <body class="bg-zinc-950 text-white font-sans">
 
-  <!-- HEADER -->
-  <header class="bg-black sticky top-0 z-50 border-b border-zinc-800">
-    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-      <h1 onclick="mostrarSeccion('inicio')" class="logo-font text-4xl cursor-pointer">TechStore 🔥</h1>
-      <nav class="flex gap-8 text-lg">
-        <button onclick="mostrarSeccion('inicio')" class="hover:text-orange-500 transition">Inicio</button>
-        <button onclick="mostrarSeccion('catalogo')" class="hover:text-orange-500 transition">Catálogo</button>
-        <button onclick="mostrarSeccion('resenas')" class="hover:text-orange-500 transition">Reseñas</button>
-      </nav>
-      <div class="flex items-center gap-6">
-        <button onclick="abrirLogin()" class="text-2xl"><i class="fas fa-cog"></i></button>
-        <button onclick="toggleCart()" class="flex items-center gap-3 bg-orange-600 hover:bg-orange-500 px-6 py-3 rounded-3xl transition">
-          <i class="fas fa-shopping-cart"></i>
-          <span id="cartCount" class="bg-white text-black font-bold w-6 h-6 rounded-full flex items-center justify-center text-sm">0</span>
-        </button>
-      </div>
+<!-- HEADER -->
+<header class="bg-black sticky top-0 z-50 border-b border-zinc-800">
+  <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+    <h1 onclick="mostrarSeccion('inicio')" class="logo-font text-4xl cursor-pointer">TechStore 🔥</h1>
+    
+    <!-- Desktop Nav -->
+    <nav id="desktopNav" class="hidden md:flex gap-8 text-lg">
+      <button onclick="mostrarSeccion('inicio')" class="hover:text-orange-500 transition">Inicio</button>
+      <button onclick="mostrarSeccion('catalogo')" class="hover:text-orange-500 transition">Catálogo</button>
+      <button onclick="mostrarSeccion('resenas')" class="hover:text-orange-500 transition">Reseñas</button>
+    </nav>
+
+    <div class="flex items-center gap-6">
+      <!-- Botón hamburguesa (solo móvil) -->
+      <button onclick="toggleMobileMenu()" class="md:hidden text-3xl">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <button onclick="abrirLogin()" class="text-2xl"><i class="fas fa-cog"></i></button>
+      <button onclick="toggleCart()" class="flex items-center gap-3 bg-orange-600 hover:bg-orange-500 px-6 py-3 rounded-3xl transition">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cartCount" class="bg-white text-black font-bold w-6 h-6 rounded-full flex items-center justify-center text-sm">0</span>
+      </button>
     </div>
-  </header>
+  </div>
+
+  <!-- Menú móvil -->
+  <div id="mobileMenu" class="hidden md:hidden bg-black border-t border-zinc-800 px-6 py-6">
+    <div class="flex flex-col gap-6 text-xl">
+      <button onclick="mostrarSeccion('inicio');toggleMobileMenu()" class="text-left hover:text-orange-500">Inicio</button>
+      <button onclick="mostrarSeccion('catalogo');toggleMobileMenu()" class="text-left hover:text-orange-500">Catálogo</button>
+      <button onclick="mostrarSeccion('resenas');toggleMobileMenu()" class="text-left hover:text-orange-500">Reseñas</button>
+    </div>
+  </div>
+</header>
 
   <!-- SLIDER -->
   <div class="slider">
