@@ -194,9 +194,15 @@ window.abrirLogin = () => document.getElementById("loginBox").classList.remove("
 window.cerrarLogin = () => document.getElementById("loginBox").classList.add("hidden");
 window.cerrarAdmin = () => document.getElementById("adminPanel").classList.add("hidden");
 
+// ====================== LOGIN CON FIREBASE AUTH (MEJORADO) ======================
 window.login = async function() {
   const email = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
+
+  if (!email || !pass) {
+    mostrarToast("❌ Ingresa email y contraseña");
+    return;
+  }
 
   try {
     await fb.signInWithEmailAndPassword(window.auth, email, pass);
@@ -204,9 +210,19 @@ window.login = async function() {
     cerrarLogin();
     document.getElementById("adminPanel").classList.remove("hidden");
     renderAdminForm();
-    mostrarToast("✅ Bienvenido Admin");
-  } catch (e) {
-    mostrarToast("❌ Credenciales incorrectas");
+    mostrarToast("✅ Bienvenido al Panel Admin 🔥");
+  } catch (error) {
+    console.error("Error de Firebase Auth:", error.code, error.message); // ← esto te ayuda a ver el error real
+
+    if (error.code === "auth/invalid-credential" || error.code === "auth/wrong-password") {
+      mostrarToast("❌ Email o contraseña incorrectos");
+    } else if (error.code === "auth/user-not-found") {
+      mostrarToast("❌ Este email no está registrado");
+    } else if (error.code === "auth/invalid-email") {
+      mostrarToast("❌ El formato del email no es válido");
+    } else {
+      mostrarToast("❌ Error: " + error.message);
+    }
   }
 };
 
