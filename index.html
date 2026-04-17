@@ -9,50 +9,132 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-zinc-950 text-white">
-  <!-- (El resto del HTML es exactamente igual al anterior, solo cambié el login y Firebase) -->
+<body class="bg-zinc-950 text-white font-sans">
 
-  <!-- LOGIN -->
-  <div id="loginBox" onclick="if(event.target.id==='loginBox')cerrarLogin()" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[400]">
-    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl p-10 w-full max-w-xs">
-      <h2 class="text-3xl font-semibold mb-8 text-center">Acceso Admin</h2>
-      <input id="user" placeholder="Email" class="w-full mb-4 px-6 py-5 bg-zinc-800 rounded-3xl text-white">
-      <input id="pass" type="password" placeholder="Contraseña" class="w-full mb-8 px-6 py-5 bg-zinc-800 rounded-3xl text-white">
-      <button onclick="login()" class="w-full py-5 bg-orange-600 hover:bg-orange-500 rounded-3xl text-xl font-semibold">ENTRAR</button>
-      <p class="text-xs text-zinc-400 text-center mt-4">Ejemplo: admin@techstore.co / TechStore2026</p>
+  <!-- HEADER -->
+  <header class="bg-black sticky top-0 z-50 border-b border-zinc-800">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+      <h1 onclick="mostrarSeccion('inicio')" class="logo-font text-4xl cursor-pointer">TechStore 🔥</h1>
+      <nav class="flex gap-8 text-lg">
+        <button onclick="mostrarSeccion('inicio')" class="hover:text-orange-500 transition">Inicio</button>
+        <button onclick="mostrarSeccion('catalogo')" class="hover:text-orange-500 transition">Catálogo</button>
+        <button onclick="mostrarSeccion('resenas')" class="hover:text-orange-500 transition">Reseñas</button>
+      </nav>
+      <div class="flex items-center gap-6">
+        <button onclick="abrirLogin()" class="text-2xl"><i class="fas fa-cog"></i></button>
+        <button onclick="toggleCart()" class="flex items-center gap-3 bg-orange-600 hover:bg-orange-500 px-6 py-3 rounded-3xl transition">
+          <i class="fas fa-shopping-cart"></i>
+          <span id="cartCount" class="bg-white text-black font-bold w-6 h-6 rounded-full flex items-center justify-center text-sm">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- SLIDER -->
+  <div class="slider">
+    <div id="slides" class="slides"></div>
+  </div>
+
+  <!-- SECCIONES -->
+  <section id="inicio" class="seccion max-w-7xl mx-auto px-6 py-16 text-center">
+    <h2 class="text-6xl font-semibold logo-font">Los mejores gadgets de Colombia</h2>
+    <p class="text-2xl text-zinc-400 mt-4">Pago contra entrega • Envío gratis</p>
+  </section>
+
+  <section id="catalogo" class="seccion max-w-7xl mx-auto px-6 py-12 hidden">
+    <input id="searchInput" type="text" placeholder="🔎 Buscar producto..." 
+           class="w-full mb-8 px-8 py-6 bg-zinc-900 border border-zinc-800 rounded-3xl text-lg focus:outline-none">
+    <div id="filtros" class="flex flex-wrap gap-3 mb-10"></div>
+    <div id="catalogoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"></div>
+  </section>
+
+  <section id="resenas" class="seccion max-w-7xl mx-auto px-6 py-16 hidden">
+    <h2 class="text-4xl font-semibold text-center mb-12">Lo que dicen nuestros clientes</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-zinc-900 p-8 rounded-3xl">🔥 "Llegó rapidísimo y la calidad es brutal" - Andrés M.</div>
+      <div class="bg-zinc-900 p-8 rounded-3xl">💯 "El mejor smartwatch que he comprado" - Laura C.</div>
+      <div class="bg-zinc-900 p-8 rounded-3xl">🚀 "Excelente servicio y productos" - Carlos R.</div>
+    </div>
+  </section>
+
+  <!-- MODAL PRODUCTO -->
+  <div id="modal" onclick="if(event.target.id==='modal')modal.classList.add('hidden')" 
+       class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[100]">
+    <div id="modalContent" class="bg-zinc-900 rounded-3xl max-w-2xl w-full mx-4 overflow-hidden"></div>
+  </div>
+
+  <!-- CARRITO -->
+  <div id="carritoPanel" onclick="if(event.target.id==='carritoPanel')toggleCart()" 
+       class="hidden fixed inset-0 bg-black/70 flex justify-end z-[200]">
+    <div onclick="event.stopImmediatePropagation()" class="carrito bg-zinc-900 w-full max-w-lg h-full overflow-auto">
+      <div class="p-8">
+        <h2 class="text-3xl font-semibold mb-8 flex justify-between">Tu Carrito <span onclick="toggleCart()" class="cursor-pointer text-4xl">×</span></h2>
+        <div id="carritoItems" class="space-y-6"></div>
+        <div class="mt-10 border-t border-zinc-700 pt-8">
+          <div class="flex justify-between text-xl"><span>Subtotal</span><span id="subtotal" class="font-bold"></span></div>
+          <button onclick="comprarPorWhatsApp()" class="w-full mt-8 py-6 bg-orange-600 hover:bg-orange-500 rounded-3xl text-2xl font-semibold">Comprar por WhatsApp</button>
+        </div>
+      </div>
     </div>
   </div>
 
-<!-- FIREBASE (ACTUALIZADO) -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } 
-    from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } 
-    from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
-  import { getAuth, signInWithEmailAndPassword } 
-    from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[300] overflow-auto">
+    <div class="bg-zinc-900 max-w-5xl w-full mx-4 rounded-3xl p-10">
+      <div class="flex justify-between mb-8">
+        <h2 class="text-4xl font-semibold">Panel Admin</h2>
+        <button onclick="cerrarAdmin()" class="text-4xl">×</button>
+      </div>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDTykDD5yoVBzBXjocM0CrkI6Ps2jsUz10",
-    authDomain: "techstore-f79a2.firebaseapp.com",
-    projectId: "techstore-f79a2",
-    storageBucket: "techstore-f79a2.firebasestorage.app",
-    messagingSenderId: "391504606305",
-    appId: "1:391504606305:web:80beb005037d6d2afa2620"
-  };
+      <div id="adminForm" class="mb-12"></div>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
-  const auth = getAuth(app);
+      <h3 class="text-2xl font-semibold mb-6">Productos en la tienda</h3>
+      <div id="listaAdmin" class="grid md:grid-cols-2 gap-6"></div>
+    </div>
+  </div>
 
-  window.db = db;
-  window.storage = storage;
-  window.auth = auth;
-  window.fb = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, ref, uploadBytes, getDownloadURL };
-</script>
+  <!-- LOGIN -->
+  <div id="loginBox" onclick="if(event.target.id==='loginBox')cerrarLogin()" 
+       class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[400]">
+    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl p-12 w-full max-w-md">
+      <h2 class="text-3xl font-semibold mb-8 text-center">Acceso Admin</h2>
+      <input id="user" placeholder="Email" class="w-full mb-6 px-8 py-6 bg-zinc-800 rounded-3xl text-xl">
+      <input id="pass" type="password" placeholder="Contraseña" class="w-full mb-10 px-8 py-6 bg-zinc-800 rounded-3xl text-xl">
+      <button onclick="login()" class="w-full py-6 bg-orange-600 hover:bg-orange-500 rounded-3xl text-2xl font-semibold">ENTRAR</button>
+    </div>
+  </div>
 
-<script src="app.js"></script>
+  <!-- TOAST -->
+  <div id="toast" class="hidden fixed bottom-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-8 py-4 rounded-3xl shadow-2xl flex items-center gap-3 text-lg">
+    <span id="toastText"></span>
+  </div>
+
+  <!-- FIREBASE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } 
+      from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } 
+      from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
+    import { getAuth, signInWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTykDD5yoVBzBXjocM0CrkI6Ps2jsUz10",
+      authDomain: "techstore-f79a2.firebaseapp.com",
+      projectId: "techstore-f79a2",
+      storageBucket: "techstore-f79a2.firebasestorage.app",
+      messagingSenderId: "391504606305",
+      appId: "1:391504606305:web:80beb005037d6d2afa2620"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    window.db = getFirestore(app);
+    window.storage = getStorage(app);
+    window.auth = getAuth(app);
+    window.fb = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, ref, uploadBytes, getDownloadURL, signInWithEmailAndPassword };
+  </script>
+
+  <script src="app.js"></script>
 </body>
 </html>
