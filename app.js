@@ -257,12 +257,25 @@ window.guardarProducto = async function() {
     if (files.length === 0 && actual) imgs.push(...actual.imgs);
   }
 
-  for (let file of files) {
-    const storageRef = fb.ref(window.storage, `productos/${Date.now()}-${file.name}`);
-    await fb.uploadBytes(storageRef, file);
-    const url = await fb.getDownloadURL(storageRef);
-    imgs.push(url);
+ for (let file of files) {
+  const fileName = `${Date.now()}-${file.name}`
+
+  const { data, error } = await window.supabase.storage
+    .from('imagenes')
+    .upload(fileName, file)
+
+  if (error) {
+    console.error(error)
+    mostrarToast("❌ Error subiendo imagen")
+    continue
   }
+
+  const { data: urlData } = window.supabase.storage
+    .from('imagenes')
+    .getPublicUrl(fileName)
+
+  imgs.push(urlData.publicUrl)
+}
 
   const data = { nombre, precio, old, descripcion, categoria, codigo, imgs: imgs.length ? imgs : ['https://picsum.photos/id/870/600/600'] };
 

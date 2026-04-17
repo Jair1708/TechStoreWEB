@@ -152,6 +152,16 @@
   window.fb = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, ref, uploadBytes, getDownloadURL, signInWithEmailAndPassword, signOut };
 </script>
 
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+  const supabase = createClient(
+    'https://dlzerjvbqixllkkralfz.supabase.co',
+    'sb_publishable_GkqUQZEVHZlKuae4szSlYQ_n3y9EgPN'
+  )
+
+  window.supabase = supabase
+</script>
 <script src="app.js"></script>
 </body>
 </html>
