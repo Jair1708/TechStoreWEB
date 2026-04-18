@@ -3,42 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TechStore 🔥 | Gadgets Premium Colombia</title>
+  <title>TechStore 🔥 | Gadgets Premium</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-zinc-950 text-white">
 
-  <!-- HEADER -->
   <header class="bg-black sticky top-0 z-50 border-b border-zinc-800">
     <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-      <h1 onclick="mostrarSeccion('inicio')" class="text-3xl font-bold cursor-pointer flex items-center gap-2">🔥 TechStore</h1>
+      <h1 onclick="window.mostrarSeccion('inicio')" class="text-3xl font-bold cursor-pointer flex items-center gap-2">🔥 TechStore</h1>
       <nav class="flex gap-8 text-sm font-medium">
-        <button onclick="mostrarSeccion('inicio')">Inicio</button>
-        <button onclick="mostrarSeccion('catalogo')">Catálogo</button>
-        <button onclick="mostrarSeccion('resenas')">Reseñas</button>
-        <button onclick="abrirLogin()" class="bg-orange-600 hover:bg-orange-500 px-6 py-2 rounded-3xl">👤 Admin</button>
+        <button onclick="window.mostrarSeccion('inicio')">Inicio</button>
+        <button onclick="window.mostrarSeccion('catalogo')">Catálogo</button>
+        <button onclick="window.mostrarSeccion('resenas')">Reseñas</button>
+        <button onclick="window.abrirLogin()" class="bg-orange-600 hover:bg-orange-500 px-6 py-2 rounded-3xl transition-all">👤 Admin</button>
       </nav>
-      <button onclick="toggleCart()" class="flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 px-6 py-3 rounded-3xl">
+      <button onclick="window.toggleCart()" class="flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 px-6 py-3 rounded-3xl">
         <i class="fa-solid fa-cart-shopping"></i>
         <span id="cartCount" class="bg-orange-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
       </button>
     </div>
   </header>
 
-  <!-- CATÁLOGO -->
-  <section id="catalogo" class="max-w-7xl mx-auto px-6 py-12">
-    <h2 class="text-4xl font-bold mb-8">Nuestros productos</h2>
-    <input id="searchInput" type="text" placeholder="🔎 Buscar producto..." class="w-full md:w-96 bg-zinc-900 border border-zinc-800 rounded-3xl px-6 py-4 mb-8 focus:outline-none focus:border-orange-500">
-    <div id="catalogoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+  <section id="inicio" class="max-w-7xl mx-auto px-6 py-20 text-center">
+    <h2 class="text-6xl font-extrabold mb-4">Lo último en tecnología</h2>
+    <p class="text-zinc-400 text-xl">Gadgets premium con envío a toda Colombia.</p>
   </section>
 
-  <!-- MODAL, CARRITO, ADMIN, LOGIN y TOAST (igual que antes) -->
-  <!-- ... (mantén todo igual desde tu versión anterior) ... -->
+  <section id="catalogo" class="max-w-7xl mx-auto px-6 py-12 hidden">
+    <h2 class="text-4xl font-bold mb-8">Nuestros productos</h2>
+    <div id="catalogoGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+  </section>
 
-  <!-- SUPABASE -->
+  <section id="resenas" class="max-w-7xl mx-auto px-6 py-12 hidden">
+    <h2 class="text-4xl font-bold mb-8">Lo que dicen nuestros clientes</h2>
+    <p class="text-zinc-400">Próximamente más reseñas...</p>
+  </section>
+
+  <div id="loginBox" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100]">
+    <div class="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 w-80">
+      <h3 class="text-xl font-bold mb-4 text-orange-500">Acceso Admin</h3>
+      <input id="user" type="email" placeholder="Email" class="w-full bg-black border border-zinc-800 p-3 mb-2 rounded-xl focus:outline-none focus:border-orange-500">
+      <input id="pass" type="password" placeholder="Contraseña" class="w-full bg-black border border-zinc-800 p-3 mb-4 rounded-xl focus:outline-none focus:border-orange-500">
+      <button onclick="window.login()" class="w-full bg-orange-600 py-3 rounded-xl font-bold hover:bg-orange-500 transition-all">Entrar</button>
+      <button onclick="window.cerrarLogin()" class="w-full mt-4 text-zinc-500 text-sm hover:text-white">Cerrar</button>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=10000"></script>
+  <script src="app.js"></script>
 </body>
 </html>
