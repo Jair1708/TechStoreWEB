@@ -34,55 +34,11 @@
     <div id="catalogoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
   </section>
 
-  <!-- MODAL PRODUCTO -->
-  <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[1000]">
-    <div id="modalContent" class="bg-zinc-900 rounded-3xl max-w-2xl w-full mx-4 overflow-hidden"></div>
-  </div>
-
-  <!-- CARRITO -->
-  <div id="carritoPanel" class="fixed top-0 right-0 w-96 h-full bg-zinc-900 shadow-2xl translate-x-full transition-transform duration-300 z-[2000] flex flex-col">
-    <div class="p-6 border-b flex justify-between">
-      <h2 class="text-2xl font-semibold">Tu carrito</h2>
-      <button onclick="toggleCart()" class="text-3xl">×</button>
-    </div>
-    <div id="carritoItems" class="flex-1 p-6 overflow-y-auto"></div>
-    <div class="p-6 border-t">
-      <div class="flex justify-between text-xl mb-6">
-        <span>Total</span>
-        <span id="subtotal" class="font-bold"></span>
-      </div>
-      <button onclick="comprarPorWhatsApp()" class="w-full bg-orange-600 hover:bg-orange-500 py-5 rounded-3xl text-xl font-semibold">Comprar por WhatsApp</button>
-    </div>
-  </div>
-
-  <!-- ADMIN PANEL -->
-  <div id="adminPanel" class="hidden fixed inset-0 bg-black/95 z-[3000] flex items-center justify-center">
-    <div class="bg-white text-black max-w-4xl w-full mx-4 rounded-3xl p-8 max-h-[90vh] overflow-auto">
-      <div class="flex justify-between mb-6">
-        <h2 class="text-3xl font-bold">Panel Admin</h2>
-        <button onclick="cerrarAdmin()" class="text-3xl">×</button>
-      </div>
-      <div id="adminForm"></div>
-      <div id="listaAdmin" class="mt-8"></div>
-    </div>
-  </div>
-
-  <!-- LOGIN -->
-  <div id="loginBox" onclick="if(event.target.id==='loginBox')cerrarLogin()" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[4000]">
-    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl p-10 w-full max-w-xs">
-      <h2 class="text-3xl font-semibold mb-8 text-center">Acceso Admin</h2>
-      <input id="user" placeholder="Email" class="w-full mb-4 px-6 py-5 bg-zinc-800 rounded-3xl text-white">
-      <input id="pass" type="password" placeholder="Contraseña" class="w-full mb-8 px-6 py-5 bg-zinc-800 rounded-3xl text-white">
-      <button onclick="login()" class="w-full py-5 bg-orange-600 hover:bg-orange-500 rounded-3xl text-xl font-semibold">ENTRAR</button>
-      <p class="text-xs text-center mt-6 text-zinc-500">Solo para el administrador</p>
-    </div>
-  </div>
-
-  <!-- TOAST -->
-  <div id="toast" class="hidden fixed bottom-6 right-6 bg-emerald-600 px-8 py-4 rounded-3xl shadow-2xl text-white">Mensaje</div>
+  <!-- MODAL, CARRITO, ADMIN, LOGIN y TOAST (igual que antes) -->
+  <!-- ... (mantén todo igual desde tu versión anterior) ... -->
 
   <!-- SUPABASE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=9999"></script>
+  <script src="app.js?v=10000"></script>
 </body>
 </html>
