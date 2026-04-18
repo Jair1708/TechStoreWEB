@@ -1,4 +1,4 @@
-// ====================== TECHSTORE - VERSIÓN FINAL 2026 ======================
+// ====================== TECHSTORE - VERSIÓN CORREGIDA (BUCKET FIJO) ======================
 const SUPABASE_URL = "https://dlzerjvbqixllkkralfz.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemVyanZicWl4bGxra3JhbGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDIyNzksImV4cCI6MjA5MjAxODI3OX0.5mtSxbh_0LOfdQ-b1LlskylovoZa1zeyn1gFx5owQYM";
 
@@ -8,7 +8,7 @@ let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let searchTerm = "";
 
-// ==================== CARGAR Y MOSTRAR PRODUCTOS ====================
+// ==================== CARGAR PRODUCTOS ====================
 async function cargarProductos() {
   const { data, error } = await client.from('productos').select('*');
   if (error) return console.error("Error cargando productos:", error);
@@ -26,7 +26,6 @@ function renderCatalogo() {
     grid.innerHTML = "";
     return;
   }
-
   empty.classList.add("hidden");
 
   grid.innerHTML = filtrados.map(p => `
@@ -36,8 +35,8 @@ function renderCatalogo() {
         <div class="absolute top-4 right-4 bg-black/80 text-white text-xs px-3 py-1 rounded-2xl font-bold">$${Number(p.precio).toLocaleString()}</div>
       </div>
       <div class="p-6">
-        <h3 class="font-bold text-xl mb-1 line-clamp-2">${p.nombre}</h3>
-        <p class="text-zinc-400 text-sm line-clamp-3 mb-6">${p.descripcion || "Sin descripción"}</p>
+        <h3 class="font-bold text-xl mb-1">${p.nombre}</h3>
+        <p class="text-zinc-400 text-sm mb-6">${p.descripcion || "Sin descripción"}</p>
         <button onclick="agregarAlCarrito(${p.id})" 
                 class="w-full bg-white text-black py-4 rounded-2xl font-bold group-hover:bg-orange-500 group-hover:text-white transition-all">
           Agregar al carrito
@@ -56,7 +55,7 @@ window.mostrarSeccion = (id) => {
 
 window.toggleMobileMenu = () => document.getElementById("mobileMenu").classList.toggle("hidden");
 
-// ==================== LOGIN Y ADMIN ====================
+// ==================== LOGIN ====================
 window.abrirLogin = () => document.getElementById("loginBox").classList.remove("hidden");
 window.cerrarLogin = () => document.getElementById("loginBox").classList.add("hidden");
 window.cerrarAdmin = () => document.getElementById("adminPanel").classList.add("hidden");
@@ -64,16 +63,14 @@ window.cerrarAdmin = () => document.getElementById("adminPanel").classList.add("
 window.login = async function() {
   const email = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
-  
   const { error } = await client.auth.signInWithPassword({ email, password: pass });
   if (error) return alert("❌ Email o contraseña incorrectos");
-  
   cerrarLogin();
   document.getElementById("adminPanel").classList.remove("hidden");
   mostrarToast("✅ Bienvenido Admin");
 };
 
-// ==================== VISTA PREVIA DE IMAGEN EN ADMIN ====================
+// ==================== VISTA PREVIA IMAGEN ====================
 function initPreview() {
   const fileInput = document.getElementById("pArchivo");
   const previewImg = document.getElementById("previewImg");
@@ -82,7 +79,6 @@ function initPreview() {
   fileInput.addEventListener("change", () => {
     const file = fileInput.files[0];
     if (!file) return;
-    
     const reader = new FileReader();
     reader.onload = (e) => {
       previewImg.src = e.target.result;
@@ -93,7 +89,7 @@ function initPreview() {
   });
 }
 
-// ==================== GUARDAR PRODUCTO (CORREGIDO) ====================
+// ==================== SUBIR PRODUCTO (BUCKET CORREGIDO) ====================
 window.guardarProducto = async function() {
   const file = document.getElementById("pArchivo").files[0];
   const nombre = document.getElementById("pNombre").value.trim();
@@ -104,19 +100,18 @@ window.guardarProducto = async function() {
 
   const nombreArchivo = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 
-  // Subir imagen
+  // ←←←←← AQUÍ ESTABA EL ERROR (ahora corregido)
   const { error: uploadError } = await client.storage
-    .from('IMAGENES_PRODUCTOS')
+    .from('imagenes_productos')           // ←←← Nombre correcto en minúsculas
     .upload(nombreArchivo, file);
 
   if (uploadError) {
     console.error(uploadError);
-    return alert("❌ Error al subir la imagen: " + uploadError.message + "\n\nRevisa que el bucket 'IMAGENES_PRODUCTOS' exista y tenga política de INSERT habilitada.");
+    return alert("❌ Error al subir imagen:\n" + uploadError.message);
   }
 
-  const { data: urlData } = client.storage.from('IMAGENES_PRODUCTOS').getPublicUrl(nombreArchivo);
+  const { data: urlData } = client.storage.from('imagenes_productos').getPublicUrl(nombreArchivo);
 
-  // Guardar en base de datos
   const { error: dbError } = await client.from('productos').insert([{
     nombre,
     precio: parseFloat(precio),
@@ -128,6 +123,7 @@ window.guardarProducto = async function() {
 
   alert("✅ ¡Producto publicado con éxito!");
   cerrarAdmin();
+  // Limpiar formulario
   document.getElementById("pNombre").value = "";
   document.getElementById("pPrecio").value = "";
   document.getElementById("pDesc").value = "";
@@ -143,7 +139,7 @@ window.agregarAlCarrito = (id) => {
   if (p) {
     carrito.push(p);
     actualizarCarrito();
-    mostrarToast("✅ Producto añadido al carrito");
+    mostrarToast("✅ Producto añadido");
   }
 };
 
@@ -156,7 +152,6 @@ function actualizarCarrito() {
 function renderCarrito() {
   const container = document.getElementById("cartItems");
   let total = 0;
-
   container.innerHTML = carrito.map((p, i) => {
     total += Number(p.precio) || 0;
     return `
@@ -166,13 +161,10 @@ function renderCarrito() {
           <h4 class="font-bold">${p.nombre}</h4>
           <p class="text-orange-400">$${Number(p.precio).toLocaleString()}</p>
         </div>
-        <button onclick="eliminarDelCarrito(${i})" class="text-red-500 self-start text-xl">
-          <i class="fa-solid fa-trash"></i>
-        </button>
+        <button onclick="eliminarDelCarrito(${i})" class="text-red-500 self-start text-xl"><i class="fa-solid fa-trash"></i></button>
       </div>
     `;
   }).join('');
-
   document.getElementById("cartTotal").textContent = "$" + total.toLocaleString();
 }
 
@@ -183,20 +175,18 @@ window.eliminarDelCarrito = (i) => {
 
 window.comprarPorWhatsApp = () => {
   if (carrito.length === 0) return alert("Tu carrito está vacío");
-  
-  let msg = "¡Hola! Quiero comprar estos productos:%0A%0A" + 
+  let msg = "¡Hola! Quiero comprar:%0A%0A" + 
             carrito.map(p => `- ${p.nombre} → $${Number(p.precio).toLocaleString()}`).join("%0A") +
             "%0A%0ATotal: $" + carrito.reduce((sum, p) => sum + Number(p.precio), 0).toLocaleString();
-
   window.open(`https://wa.me/573000000000?text=${msg}`, "_blank");
 };
 
 // ==================== TOAST ====================
 function mostrarToast(msg) {
   const t = document.getElementById("toast");
-  t.innerHTML = msg;
+  t.textContent = msg;
   t.classList.remove("hidden");
-  setTimeout(() => t.classList.add("hidden"), 3000);
+  setTimeout(() => t.classList.add("hidden"), 2800);
 }
 
 // ==================== INICIO ====================
@@ -205,7 +195,6 @@ window.onload = () => {
   actualizarCarrito();
   initPreview();
 
-  // Buscador en tiempo real
   document.getElementById("searchInput").addEventListener("input", (e) => {
     searchTerm = e.target.value;
     renderCatalogo();
