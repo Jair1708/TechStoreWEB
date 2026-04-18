@@ -1,15 +1,14 @@
-// ====================== TECHSTORE - VERSIÓN FINAL CORREGIDA ======================
+// ====================== TECHSTORE - VERSIÓN FINAL 2026 ======================
 const SUPABASE_URL = "https://dlzerjvbqixllkkralfz.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemVyanZicWl4bGxra3JhbGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDIyNzksImV4cCI6MjA5MjAxODI3OX0.5mtSxbh_0LOfdQ-b1LlskylovoZa1zeyn1gFx5owQYM";
 
-// Usamos 'client' para evitar errores de duplicidad
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let searchTerm = "";
 
-// --- CARGAR PRODUCTOS ---
+// ==================== CARGAR Y MOSTRAR PRODUCTOS ====================
 async function cargarProductos() {
   const { data, error } = await client.from('productos').select('*');
   if (error) return console.error("Error cargando productos:", error);
@@ -19,28 +18,45 @@ async function cargarProductos() {
 
 function renderCatalogo() {
   const grid = document.getElementById("catalogoGrid");
-  if (!grid) return;
+  const empty = document.getElementById("emptyState");
   const filtrados = productos.filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
-  
+
+  if (filtrados.length === 0) {
+    empty.classList.remove("hidden");
+    grid.innerHTML = "";
+    return;
+  }
+
+  empty.classList.add("hidden");
+
   grid.innerHTML = filtrados.map(p => `
-    <div class="product-card bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-      <img src="${p.imgs}" class="w-full h-48 object-cover rounded-xl mb-4" onerror="this.src='https://via.placeholder.com/150'">
-      <h3 class="font-bold text-lg">${p.nombre}</h3>
-      <p class="text-orange-500 font-bold">$${Number(p.precio).toLocaleString()}</p>
-      <button onclick="agregarAlCarrito(${p.id})" class="mt-4 w-full bg-white text-black py-2 rounded-xl font-bold hover:bg-orange-500 hover:text-white transition-all">
-        Agregar al Carrito
-      </button>
+    <div class="product-card group bg-zinc-900 border border-zinc-800 hover:border-orange-500 rounded-3xl overflow-hidden transition-all duration-300 hover:-translate-y-2">
+      <div class="relative">
+        <img src="${p.imgs}" class="w-full h-64 object-cover" onerror="this.src='https://via.placeholder.com/400x300?text=Sin+imagen'">
+        <div class="absolute top-4 right-4 bg-black/80 text-white text-xs px-3 py-1 rounded-2xl font-bold">$${Number(p.precio).toLocaleString()}</div>
+      </div>
+      <div class="p-6">
+        <h3 class="font-bold text-xl mb-1 line-clamp-2">${p.nombre}</h3>
+        <p class="text-zinc-400 text-sm line-clamp-3 mb-6">${p.descripcion || "Sin descripción"}</p>
+        <button onclick="agregarAlCarrito(${p.id})" 
+                class="w-full bg-white text-black py-4 rounded-2xl font-bold group-hover:bg-orange-500 group-hover:text-white transition-all">
+          Agregar al carrito
+        </button>
+      </div>
     </div>
   `).join('');
 }
 
-// --- NAVEGACIÓN Y LOGIN ---
+// ==================== NAVEGACIÓN ====================
 window.mostrarSeccion = (id) => {
   document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
   const section = document.getElementById(id);
   if (section) section.classList.remove("hidden");
 };
 
+window.toggleMobileMenu = () => document.getElementById("mobileMenu").classList.toggle("hidden");
+
+// ==================== LOGIN Y ADMIN ====================
 window.abrirLogin = () => document.getElementById("loginBox").classList.remove("hidden");
 window.cerrarLogin = () => document.getElementById("loginBox").classList.add("hidden");
 window.cerrarAdmin = () => document.getElementById("adminPanel").classList.add("hidden");
@@ -48,16 +64,78 @@ window.cerrarAdmin = () => document.getElementById("adminPanel").classList.add("
 window.login = async function() {
   const email = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
+  
   const { error } = await client.auth.signInWithPassword({ email, password: pass });
-  if (error) alert("❌ Datos incorrectos");
-  else {
-    window.cerrarLogin();
-    document.getElementById("adminPanel").classList.remove("hidden");
-    mostrarToast("✅ Bienvenido Admin");
-  }
+  if (error) return alert("❌ Email o contraseña incorrectos");
+  
+  cerrarLogin();
+  document.getElementById("adminPanel").classList.remove("hidden");
+  mostrarToast("✅ Bienvenido Admin");
 };
 
-// --- CARRITO ---
+// ==================== VISTA PREVIA DE IMAGEN EN ADMIN ====================
+function initPreview() {
+  const fileInput = document.getElementById("pArchivo");
+  const previewImg = document.getElementById("previewImg");
+  const placeholder = document.getElementById("previewPlaceholder");
+
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImg.src = e.target.result;
+      previewImg.classList.remove("hidden");
+      placeholder.classList.add("hidden");
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ==================== GUARDAR PRODUCTO (CORREGIDO) ====================
+window.guardarProducto = async function() {
+  const file = document.getElementById("pArchivo").files[0];
+  const nombre = document.getElementById("pNombre").value.trim();
+  const precio = document.getElementById("pPrecio").value;
+  const descripcion = document.getElementById("pDesc").value.trim();
+
+  if (!file || !nombre || !precio) return alert("⚠️ Completa todos los campos y selecciona una imagen");
+
+  const nombreArchivo = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+
+  // Subir imagen
+  const { error: uploadError } = await client.storage
+    .from('IMAGENES_PRODUCTOS')
+    .upload(nombreArchivo, file);
+
+  if (uploadError) {
+    console.error(uploadError);
+    return alert("❌ Error al subir la imagen: " + uploadError.message + "\n\nRevisa que el bucket 'IMAGENES_PRODUCTOS' exista y tenga política de INSERT habilitada.");
+  }
+
+  const { data: urlData } = client.storage.from('IMAGENES_PRODUCTOS').getPublicUrl(nombreArchivo);
+
+  // Guardar en base de datos
+  const { error: dbError } = await client.from('productos').insert([{
+    nombre,
+    precio: parseFloat(precio),
+    descripcion,
+    imgs: urlData.publicUrl
+  }]);
+
+  if (dbError) return alert("❌ Error al guardar en la base de datos: " + dbError.message);
+
+  alert("✅ ¡Producto publicado con éxito!");
+  cerrarAdmin();
+  document.getElementById("pNombre").value = "";
+  document.getElementById("pPrecio").value = "";
+  document.getElementById("pDesc").value = "";
+  document.getElementById("pArchivo").value = "";
+  cargarProductos();
+};
+
+// ==================== CARRITO ====================
 window.toggleCart = () => document.getElementById("cartPanel").classList.toggle("translate-x-full");
 
 window.agregarAlCarrito = (id) => {
@@ -65,7 +143,7 @@ window.agregarAlCarrito = (id) => {
   if (p) {
     carrito.push(p);
     actualizarCarrito();
-    mostrarToast("✅ Producto añadido");
+    mostrarToast("✅ Producto añadido al carrito");
   }
 };
 
@@ -77,16 +155,25 @@ function actualizarCarrito() {
 
 function renderCarrito() {
   const container = document.getElementById("cartItems");
-  if (!container) return;
-  container.innerHTML = carrito.map((p, i) => `
-    <div class="flex items-center justify-between bg-zinc-800 p-3 rounded-xl mb-2">
-      <div class="flex items-center gap-3">
-        <img src="${p.imgs}" class="w-12 h-12 object-cover rounded-lg">
-        <div><p class="text-sm font-bold">${p.nombre}</p><p class="text-xs text-orange-500">$${Number(p.precio).toLocaleString()}</p></div>
+  let total = 0;
+
+  container.innerHTML = carrito.map((p, i) => {
+    total += Number(p.precio) || 0;
+    return `
+      <div class="flex gap-4 bg-zinc-800 rounded-2xl p-4">
+        <img src="${p.imgs}" class="w-16 h-16 object-cover rounded-xl">
+        <div class="flex-1">
+          <h4 class="font-bold">${p.nombre}</h4>
+          <p class="text-orange-400">$${Number(p.precio).toLocaleString()}</p>
+        </div>
+        <button onclick="eliminarDelCarrito(${i})" class="text-red-500 self-start text-xl">
+          <i class="fa-solid fa-trash"></i>
+        </button>
       </div>
-      <button onclick="eliminarDelCarrito(${i})" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+
+  document.getElementById("cartTotal").textContent = "$" + total.toLocaleString();
 }
 
 window.eliminarDelCarrito = (i) => {
@@ -96,58 +183,30 @@ window.eliminarDelCarrito = (i) => {
 
 window.comprarPorWhatsApp = () => {
   if (carrito.length === 0) return alert("Tu carrito está vacío");
-  let msg = "¡Hola! Me interesan estos productos:%0A" + carrito.map(p => `- ${p.nombre} ($${p.precio})`).join("%0A");
+  
+  let msg = "¡Hola! Quiero comprar estos productos:%0A%0A" + 
+            carrito.map(p => `- ${p.nombre} → $${Number(p.precio).toLocaleString()}`).join("%0A") +
+            "%0A%0ATotal: $" + carrito.reduce((sum, p) => sum + Number(p.precio), 0).toLocaleString();
+
   window.open(`https://wa.me/573000000000?text=${msg}`, "_blank");
 };
 
-// --- GESTIÓN DE PRODUCTOS (ADMIN) ---
-window.guardarProducto = async function() {
-  const fileInput = document.getElementById("pArchivo");
-  const file = fileInput.files[0];
-  const nombre = document.getElementById("pNombre").value;
-  const precio = document.getElementById("pPrecio").value;
-  const descripcion = document.getElementById("pDesc").value;
-
-  if (!file || !nombre || !precio) return alert("⚠️ Completa los datos y selecciona una imagen");
-
-  const nombreArchivo = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-
-  // Usamos 'IMAGENES_PRODUCTOS' en mayúsculas
-  const { data, error: uploadError } = await client.storage
-    .from('IMAGENES_PRODUCTOS')
-    .upload(nombreArchivo, file);
-
-  if (uploadError) return alert("❌ Error Bucket: " + uploadError.message);
-
-  const { data: urlData } = client.storage.from('IMAGENES_PRODUCTOS').getPublicUrl(nombreArchivo);
-  
-  const { error: dbError } = await client.from('productos').insert([{
-    nombre, 
-    precio: parseFloat(precio), 
-    descripcion, 
-    imgs: urlData.publicUrl
-  }]);
-
-  if (dbError) alert("Error DB: " + dbError.message);
-  else {
-    alert("✅ Producto publicado con éxito");
-    window.cerrarAdmin();
-    cargarProductos();
-  }
-};
-
+// ==================== TOAST ====================
 function mostrarToast(msg) {
   const t = document.getElementById("toast");
-  if (!t) return;
-  t.innerText = msg;
-  t.classList.remove("translate-y-20", "opacity-0");
-  setTimeout(() => t.classList.add("translate-y-20", "opacity-0"), 3000);
+  t.innerHTML = msg;
+  t.classList.remove("hidden");
+  setTimeout(() => t.classList.add("hidden"), 3000);
 }
 
+// ==================== INICIO ====================
 window.onload = () => {
   cargarProductos();
   actualizarCarrito();
-  document.getElementById("searchInput")?.addEventListener("input", (e) => {
+  initPreview();
+
+  // Buscador en tiempo real
+  document.getElementById("searchInput").addEventListener("input", (e) => {
     searchTerm = e.target.value;
     renderCatalogo();
   });

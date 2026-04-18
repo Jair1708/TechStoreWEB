@@ -2,12 +2,7 @@
   display: none !important;
 }
 
+/* Pequeños ajustes extra para que se vea más premium */
 .product-card {
   transition: all 0.3s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-8px);
-  border-color: #f97316;
-  box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.2);
 }
