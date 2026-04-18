@@ -2,40 +2,72 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TechStore 🔥</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-black text-white">
+<body class="bg-zinc-950 text-white font-sans">
 
-<h1 class="text-3xl p-4">TechStore 🔥</h1>
+  <header class="bg-black p-4 flex justify-between items-center sticky top-0 z-50 border-b border-zinc-800">
+    <h1 onclick="mostrarSeccion('inicio')" class="text-3xl font-bold flex items-center gap-2 cursor-pointer logo-font">
+      🔥 TechStore
+    </h1>
+    <div class="flex gap-4">
+      <button onclick="mostrarSeccion('inicio')" class="tab px-6 py-2 rounded-2xl">Inicio</button>
+      <button onclick="mostrarSeccion('admin')" class="tab px-6 py-2 rounded-2xl">Admin</button>
+      <button onclick="toggleCarrito()" class="flex items-center gap-2 bg-orange-600 hover:bg-orange-500 px-5 py-2 rounded-3xl">
+        🛒 <span id="cartCount" class="bg-white text-black text-sm font-bold px-3 py-1 rounded-full">0</span>
+      </button>
+    </div>
+  </header>
 
-<button onclick="mostrarSeccion('inicio')">Inicio</button>
-<button onclick="mostrarSeccion('admin')">Admin</button>
+  <!-- CATÁLOGO -->
+  <section id="inicio" class="seccion p-6">
+    <h2 class="text-3xl font-bold mb-6">Nuestros productos</h2>
+    <div id="catalogo" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+  </section>
 
-<section id="inicio" class="seccion p-4">
-  <h2>Productos</h2>
-  <div id="catalogo"></div>
-</section>
+  <!-- ADMIN -->
+  <section id="admin" class="seccion hidden p-6 max-w-2xl mx-auto">
+    <h2 class="text-3xl font-bold mb-6">Agregar nuevo producto</h2>
+    <input id="nombre" placeholder="Nombre del producto" class="w-full mb-4 p-4 bg-zinc-900 rounded-3xl text-lg">
+    <input id="precio" type="number" placeholder="Precio" class="w-full mb-4 p-4 bg-zinc-900 rounded-3xl text-lg">
+    <textarea id="descripcion" placeholder="Descripción del producto" rows="4" class="w-full mb-4 p-4 bg-zinc-900 rounded-3xl text-lg"></textarea>
+    
+    <label class="block mb-2 text-orange-400">Fotos del producto (múltiples)</label>
+    <input id="file" type="file" multiple accept="image/*" class="w-full mb-6 p-4 bg-zinc-900 rounded-3xl">
+    
+    <button onclick="subirProducto()" 
+            class="w-full bg-orange-600 hover:bg-orange-500 py-5 rounded-3xl text-xl font-semibold">
+      📤 Subir producto
+    </button>
+  </section>
 
-<section id="admin" class="seccion hidden p-4">
-  <h2>Subir producto</h2>
-  <input id="nombre" placeholder="Nombre"><br>
-  <input id="precio" type="number" placeholder="Precio"><br>
-  <input id="file" type="file"><br><br>
-  <button onclick="subir()">SUBIR</button>
-</section>
+  <!-- MODAL -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+    <div id="modalContent" class="bg-zinc-900 rounded-3xl max-w-lg w-full mx-4 overflow-hidden"></div>
+  </div>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  <!-- CARRITO -->
+  <div id="carrito" class="hidden fixed bottom-0 right-0 w-96 h-screen bg-zinc-900 shadow-2xl transform translate-x-full transition-all duration-300 z-50">
+    <div class="p-6">
+      <h2 class="text-2xl font-bold mb-6 flex justify-between">🛒 Carrito <span onclick="toggleCarrito()" class="cursor-pointer text-3xl">×</span></h2>
+      <div id="carritoItems" class="space-y-6 mb-8"></div>
+      <button onclick="comprarPorWhatsApp()" 
+              class="w-full bg-green-600 hover:bg-green-500 py-5 rounded-3xl text-xl font-semibold">
+        ✅ Pedir por WhatsApp
+      </button>
+    </div>
+  </div>
 
-const supabase = createClient(
-  'https://dlzerjvbqixllkkralfz.supabase.co',
-  'sb_publishable_GkqUQZEVHZlKuae4szSlYQ_n3y9EgPN'
-)
-
-window.supabase = supabase
-</script>
-
-<script src="app.js"></script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    window.supabase = createClient(
+      'https://dlzerjvbqixllkkralfz.supabase.co',
+      'sb_publishable_GkqUQZEVHZlKuae4szSlYQ_n3y9EgPN'
+    )
+  </script>
+  <script src="app.js"></script>
 </body>
 </html>

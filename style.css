@@ -3,21 +3,14 @@
 body { font-family: 'Inter', system-ui, sans-serif; }
 .logo-font { font-family: 'Space Grotesk', sans-serif; }
 
-.slider { height: 420px; position: relative; overflow: hidden; }
-.slides { display: flex; height: 100%; transition: transform 800ms cubic-bezier(0.4, 0, 0.2, 1); }
-.slide { min-width: 100%; background-size: cover; background-position: center; position: relative; }
-
-.product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-.product-card:hover { transform: translateY(-6px); box-shadow: 0 25px 50px -12px rgb(255 94 0 / 0.3); }
-
-.carrito { box-shadow: -20px 0 25px -5px rgb(0 0 0 / 0.3); }
-
-.tab { transition: all 0.2s; }
-.tab-active { background-color: #f59e0b; color: white !important; }
-
-input:focus, textarea:focus {
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+.product-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 25px 50px -12px rgb(255 94 0 / 0.3);
+}
+
+.tab-active { background-color: #f59e0b; color: white !important; }
 
 .hidden { display: none !important; }
