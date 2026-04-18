@@ -1,4 +1,4 @@
-// ====================== TECHSTORE - VERSIÓN CORREGIDA (BUCKET FIJO) ======================
+// ====================== TECHSTORE - VERSIÓN DEFINITIVA ======================
 const SUPABASE_URL = "https://dlzerjvbqixllkkralfz.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemVyanZicWl4bGxra3JhbGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDIyNzksImV4cCI6MjA5MjAxODI3OX0.5mtSxbh_0LOfdQ-b1LlskylovoZa1zeyn1gFx5owQYM";
 
@@ -8,7 +8,7 @@ let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let searchTerm = "";
 
-// ==================== CARGAR PRODUCTOS ====================
+// Cargar productos
 async function cargarProductos() {
   const { data, error } = await client.from('productos').select('*');
   if (error) return console.error("Error cargando productos:", error);
@@ -37,8 +37,7 @@ function renderCatalogo() {
       <div class="p-6">
         <h3 class="font-bold text-xl mb-1">${p.nombre}</h3>
         <p class="text-zinc-400 text-sm mb-6">${p.descripcion || "Sin descripción"}</p>
-        <button onclick="agregarAlCarrito(${p.id})" 
-                class="w-full bg-white text-black py-4 rounded-2xl font-bold group-hover:bg-orange-500 group-hover:text-white transition-all">
+        <button onclick="agregarAlCarrito(${p.id})" class="w-full bg-white text-black py-4 rounded-2xl font-bold group-hover:bg-orange-500 group-hover:text-white transition-all">
           Agregar al carrito
         </button>
       </div>
@@ -46,7 +45,8 @@ function renderCatalogo() {
   `).join('');
 }
 
-// ==================== NAVEGACIÓN ====================
+// Resto del código (navegación, login, carrito, toast, etc.) se mantiene igual que la versión anterior que te di.
+
 window.mostrarSeccion = (id) => {
   document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
   const section = document.getElementById(id);
@@ -54,8 +54,6 @@ window.mostrarSeccion = (id) => {
 };
 
 window.toggleMobileMenu = () => document.getElementById("mobileMenu").classList.toggle("hidden");
-
-// ==================== LOGIN ====================
 window.abrirLogin = () => document.getElementById("loginBox").classList.remove("hidden");
 window.cerrarLogin = () => document.getElementById("loginBox").classList.add("hidden");
 window.cerrarAdmin = () => document.getElementById("adminPanel").classList.add("hidden");
@@ -70,12 +68,10 @@ window.login = async function() {
   mostrarToast("✅ Bienvenido Admin");
 };
 
-// ==================== VISTA PREVIA IMAGEN ====================
 function initPreview() {
   const fileInput = document.getElementById("pArchivo");
   const previewImg = document.getElementById("previewImg");
   const placeholder = document.getElementById("previewPlaceholder");
-
   fileInput.addEventListener("change", () => {
     const file = fileInput.files[0];
     if (!file) return;
@@ -89,7 +85,6 @@ function initPreview() {
   });
 }
 
-// ==================== SUBIR PRODUCTO (BUCKET CORREGIDO) ====================
 window.guardarProducto = async function() {
   const file = document.getElementById("pArchivo").files[0];
   const nombre = document.getElementById("pNombre").value.trim();
@@ -100,14 +95,13 @@ window.guardarProducto = async function() {
 
   const nombreArchivo = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 
-  // ←←←←← AQUÍ ESTABA EL ERROR (ahora corregido)
   const { error: uploadError } = await client.storage
-    .from('imagenes_productos')           // ←←← Nombre correcto en minúsculas
+    .from('imagenes_productos')
     .upload(nombreArchivo, file);
 
   if (uploadError) {
     console.error(uploadError);
-    return alert("❌ Error al subir imagen:\n" + uploadError.message);
+    return alert("❌ Error al subir imagen:\n" + uploadError.message + "\n\nRevisa las políticas del bucket.");
   }
 
   const { data: urlData } = client.storage.from('imagenes_productos').getPublicUrl(nombreArchivo);
@@ -116,14 +110,13 @@ window.guardarProducto = async function() {
     nombre,
     precio: parseFloat(precio),
     descripcion,
-    imgs: urlData.publicUrl
+    imgs: urlData.publicUrl   // ← ahora coincide con la columna TEXT
   }]);
 
-  if (dbError) return alert("❌ Error al guardar en la base de datos: " + dbError.message);
+  if (dbError) return alert("❌ Error al guardar en BD: " + dbError.message);
 
   alert("✅ ¡Producto publicado con éxito!");
   cerrarAdmin();
-  // Limpiar formulario
   document.getElementById("pNombre").value = "";
   document.getElementById("pPrecio").value = "";
   document.getElementById("pDesc").value = "";
@@ -131,7 +124,7 @@ window.guardarProducto = async function() {
   cargarProductos();
 };
 
-// ==================== CARRITO ====================
+// (El resto del código de carrito, toast y onload es igual que antes)
 window.toggleCart = () => document.getElementById("cartPanel").classList.toggle("translate-x-full");
 
 window.agregarAlCarrito = (id) => {
@@ -168,10 +161,7 @@ function renderCarrito() {
   document.getElementById("cartTotal").textContent = "$" + total.toLocaleString();
 }
 
-window.eliminarDelCarrito = (i) => {
-  carrito.splice(i, 1);
-  actualizarCarrito();
-};
+window.eliminarDelCarrito = (i) => { carrito.splice(i, 1); actualizarCarrito(); };
 
 window.comprarPorWhatsApp = () => {
   if (carrito.length === 0) return alert("Tu carrito está vacío");
@@ -181,7 +171,6 @@ window.comprarPorWhatsApp = () => {
   window.open(`https://wa.me/573000000000?text=${msg}`, "_blank");
 };
 
-// ==================== TOAST ====================
 function mostrarToast(msg) {
   const t = document.getElementById("toast");
   t.textContent = msg;
@@ -189,7 +178,6 @@ function mostrarToast(msg) {
   setTimeout(() => t.classList.add("hidden"), 2800);
 }
 
-// ==================== INICIO ====================
 window.onload = () => {
   cargarProductos();
   actualizarCarrito();
