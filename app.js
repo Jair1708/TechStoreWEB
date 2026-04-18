@@ -1,9 +1,9 @@
-// ====================== CONFIGURACIÓN SUPABASE (TU PROYECTO) ======================
+// ====================== CONFIGURACIÓN SUPABASE ======================
 const SUPABASE_URL = "https://dlzerjvbqixllkkralfz.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemVyanZicWl4bGxra3JhbGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDIyNzksImV4cCI6MjA5MjAxODI3OX0.5mtSxbh_0LOfdQ-b1LlskylovoZa1zeyn1gFx5owQYM";
-const { createClient } = Supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// =================================================================================
+
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ====================================================================
 
 let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
@@ -11,7 +11,7 @@ let searchTerm = "";
 
 // ====================== CARGAR PRODUCTOS ======================
 async function cargarProductos() {
-  const { data, error } = await db.from('productos').select('*');
+  const { data, error } = await supabase.from('productos').select('*');
   if (error) return console.error("Error cargando productos:", error);
   productos = data || [];
   renderCatalogo();
@@ -32,7 +32,7 @@ window.login = async function() {
   const email = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
 
-  const { error } = await db.auth.signInWithPassword({ email, password: pass });
+  const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
   if (error) {
     alert("❌ Email o contraseña incorrectos");
   } else {
@@ -60,7 +60,7 @@ window.agregarAlCarrito = function(id) {
   const prod = productos.find(p => p.id === id);
   if (!prod) return;
   const existe = carrito.find(i => i.id === id);
-  if (existe) existe.cantidad++;
+  if (existe) existe.cantidad = (existe.cantidad || 1) + 1;
   else carrito.push({ ...prod, cantidad: 1 });
   localStorage.setItem("carrito", JSON.stringify(carrito));
   actualizarCarrito();
@@ -217,10 +217,10 @@ async function agregarProductoAdmin() {
   const imgs = [];
   for (let file of files) {
     const fileName = `${Date.now()}-${file.name}`;
-    const { error: uploadError } = await db.storage.from('productos').upload(fileName, file);
+    const { error: uploadError } = await supabase.storage.from('productos').upload(fileName, file);
     if (uploadError) return alert("Error al subir imagen");
 
-    const { data: urlData } = db.storage.from('productos').getPublicUrl(fileName);
+    const { data: urlData } = supabase.storage.from('productos').getPublicUrl(fileName);
     imgs.push(urlData.publicUrl);
   }
 
@@ -232,7 +232,7 @@ async function agregarProductoAdmin() {
     imgs: imgs
   };
 
-  const { error } = await db.from('productos').insert(nuevo);
+  const { error } = await supabase.from('productos').insert(nuevo);
   if (error) alert(error.message);
   else {
     mostrarToast("✅ Producto agregado");
@@ -243,7 +243,7 @@ async function agregarProductoAdmin() {
 
 window.eliminarProducto = async function(id) {
   if (confirm("¿Eliminar este producto?")) {
-    const { error } = await db.from('productos').delete().eq('id', id);
+    const { error } = await supabase.from('productos').delete().eq('id', id);
     if (!error) {
       cargarProductos();
       renderAdmin();
