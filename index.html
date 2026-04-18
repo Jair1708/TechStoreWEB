@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TechStore 🔥 | Gadgets Premium</title>
+  <title>TechStore 🔥 | Panel Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
@@ -25,17 +25,10 @@
     </div>
   </header>
 
-  <section id="inicio" class="max-w-7xl mx-auto px-6 py-20 text-center">
-    <h2 class="text-6xl font-extrabold mb-4 text-white">Lo último en tecnología</h2>
-    <p class="text-zinc-400 text-xl">Gadgets premium con envío a toda Colombia.</p>
-  </section>
-
-  <section id="catalogo" class="max-w-7xl mx-auto px-6 py-12 hidden">
-    <div class="flex justify-between items-center mb-8">
-      <h2 class="text-4xl font-bold">Nuestros productos</h2>
-      <input id="searchInput" type="text" placeholder="🔎 Buscar..." class="bg-zinc-900 border border-zinc-800 rounded-3xl px-6 py-3 focus:outline-none focus:border-orange-500">
-    </div>
-    <div id="catalogoGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+  <section id="catalogo" class="max-w-7xl mx-auto px-6 py-12">
+    <h2 class="text-4xl font-bold mb-8 text-center">Nuestros productos</h2>
+    <div id="catalogoGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      </div>
   </section>
 
   <div id="loginBox" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100]">
@@ -43,37 +36,28 @@
       <h3 class="text-xl font-bold mb-4 text-orange-500 text-center">Acceso Admin</h3>
       <input id="user" type="email" placeholder="Email" class="w-full bg-black border border-zinc-800 p-3 mb-2 rounded-xl outline-none focus:border-orange-500">
       <input id="pass" type="password" placeholder="Contraseña" class="w-full bg-black border border-zinc-800 p-3 mb-4 rounded-xl outline-none focus:border-orange-500">
-      <button onclick="window.login()" class="w-full bg-orange-600 py-3 rounded-xl font-bold hover:bg-orange-500 transition-all">Entrar</button>
-      <button onclick="window.cerrarLogin()" class="w-full mt-4 text-zinc-500 text-sm hover:text-white">Cancelar</button>
+      <button onclick="window.login()" class="w-full bg-orange-600 py-3 rounded-xl font-bold hover:bg-orange-500">Entrar</button>
+      <button onclick="window.cerrarLogin()" class="w-full mt-4 text-zinc-500 text-sm">Cancelar</button>
     </div>
   </div>
 
   <div id="adminPanel" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[110] overflow-y-auto p-4">
     <div class="bg-zinc-900 border border-zinc-800 w-full max-w-2xl p-8 rounded-3xl shadow-2xl">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-orange-500">Gestión de Producto</h2>
+        <h2 class="text-2xl font-bold text-orange-500">Nuevo Producto</h2>
         <button onclick="window.cerrarAdmin()" class="text-zinc-500 hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
       </div>
-
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="space-y-4">
-          <input id="pNombre" type="text" placeholder="Nombre del producto" class="w-full bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none">
-          <input id="pPrecio" type="number" placeholder="Precio (COP)" class="w-full bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none">
-          <textarea id="pDesc" placeholder="Descripción detallada" class="w-full bg-black border border-zinc-800 p-3 rounded-xl h-24 focus:border-orange-500 outline-none"></textarea>
-        </div>
-        <div class="space-y-4">
-          <input id="pColores" type="text" placeholder="Colores (ej: Negro, Plata)" class="w-full bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none">
-          <input id="pTallas" type="text" placeholder="Tallas/Capacidad (ej: M, L o 128GB)" class="w-full bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none">
-          <div class="bg-black border border-zinc-800 p-3 rounded-xl">
-            <label class="text-xs text-zinc-500 block mb-1">Rutas de imágenes (separadas por coma)</label>
-            <input id="pImagenes" type="text" placeholder="img/foto1.jpg, img/foto2.jpg" class="w-full bg-transparent outline-none">
-          </div>
-        </div>
+        <input id="pNombre" type="text" placeholder="Nombre" class="w-full bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none">
+        <input id="pPrecio" type="number" placeholder="Precio" class="w-full bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none">
+        <textarea id="pDesc" placeholder="Descripción" class="w-full bg-black border border-zinc-800 p-3 rounded-xl h-24 focus:border-orange-500 outline-none md:col-span-2"></textarea>
+        <input id="pColores" type="text" placeholder="Colores" class="w-full bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none">
+        <input id="pTallas" type="text" placeholder="Tallas/Capacidad" class="w-full bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none">
+        <input id="pImagenes" type="text" placeholder="Ruta de imagen (ej: img/reloj.jpg)" class="w-full bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none md:col-span-2">
       </div>
-
       <div class="mt-8 flex gap-4">
-        <button onclick="window.guardarProducto()" class="flex-1 bg-orange-600 py-3 rounded-xl font-bold hover:bg-orange-500 transition-all">Guardar Producto</button>
-        <button onclick="window.cerrarAdmin()" class="flex-1 bg-zinc-800 py-3 rounded-xl font-bold hover:bg-zinc-700 transition-all">Cancelar</button>
+        <button onclick="window.guardarProducto()" class="flex-1 bg-orange-600 py-3 rounded-xl font-bold hover:bg-orange-500">Guardar</button>
+        <button onclick="window.cerrarAdmin()" class="flex-1 bg-zinc-800 py-3 rounded-xl font-bold">Cancelar</button>
       </div>
     </div>
   </div>
