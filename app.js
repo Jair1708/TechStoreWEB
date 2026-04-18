@@ -1,159 +1,193 @@
-// ====================== VARIABLES ======================
+let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-
-// ====================== SECCIONES ======================
-window.mostrarSeccion = function(id) {
-  document.querySelectorAll(".seccion").forEach(s => s.classList.add("hidden"));
-  const seccion = document.getElementById(id);
-  if (seccion) seccion.classList.remove("hidden");
-};
+let adminLoggeado = false;
+let searchTerm = "";
 
 // ====================== CARGAR PRODUCTOS ======================
 async function cargarProductos() {
-  const { data: productos, error } = await window.supabase
-    .from('productos')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) return console.error(error);
-
-  const cont = document.getElementById("catalogo");
-  cont.innerHTML = productos.map(p => `
-    <div onclick="verProducto('${p.id}')" class="product-card bg-zinc-900 rounded-3xl overflow-hidden cursor-pointer">
-      <img src="${p.imgs[0]}" class="w-full h-56 object-cover">
-      <div class="p-4">
-        <h3 class="font-semibold text-lg">${p.nombre}</h3>
-        <p class="text-orange-400 text-2xl font-bold">$${Number(p.precio).toLocaleString('es-CO')}</p>
-      </div>
-    </div>
-  `).join("");
+  const querySnapshot = await fb.getDocs(fb.collection(db, "productos"));
+  productos = [];
+  querySnapshot.forEach(doc => {
+    productos.push({ id: doc.id, ...doc.data() });
+  });
+  renderCatalogo();
 }
 
-// ====================== VER PRODUCTO (MODAL) ======================
-window.verProducto = async function(id) {
-  const { data: p } = await window.supabase
-    .from('productos')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (!p) return;
-
-  let index = 0;
-  const modalContent = document.getElementById("modalContent");
-
-  modalContent.innerHTML = `
-    <div class="p-6">
-      <button onclick="document.getElementById('modal').classList.add('hidden')" class="float-right text-4xl">×</button>
-      <div class="relative">
-        <img id="modalImg" src="${p.imgs[0]}" class="w-full rounded-2xl">
-        <div class="absolute top-1/2 w-full flex justify-between px-4">
-          <button onclick="cambiarImg(-1)" class="bg-black/70 text-white w-10 h-10 rounded-2xl text-3xl">‹</button>
-          <button onclick="cambiarImg(1)" class="bg-black/70 text-white w-10 h-10 rounded-2xl text-3xl">›</button>
-        </div>
-      </div>
-      <h2 class="text-3xl font-bold mt-6">${p.nombre}</h2>
-      <p class="text-orange-400 text-4xl font-bold mt-2">$${Number(p.precio).toLocaleString('es-CO')}</p>
-      <p class="mt-6 text-zinc-300">${p.descripcion || 'Sin descripción'}</p>
-      <button onclick="agregarAlCarrito('${p.id}')" class="w-full mt-8 bg-orange-600 hover:bg-orange-500 py-5 rounded-3xl text-xl font-semibold">🛒 Agregar al carrito</button>
-    </div>
-  `;
-
-  document.getElementById("modal").classList.remove("hidden");
-
-  window.cambiarImg = function(dir) {
-    index = (index + dir + p.imgs.length) % p.imgs.length;
-    document.getElementById("modalImg").src = p.imgs[index];
-  };
+// ====================== NAVEGACIÓN ======================
+window.mostrarSeccion = function(id) {
+  document.querySelectorAll(".seccion").forEach(s => s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
 };
 
-// ====================== SUBIR PRODUCTO ======================
-window.subirProducto = async function() {
-  const nombre = document.getElementById("nombre").value.trim();
-  const precio = document.getElementById("precio").value;
-  const descripcion = document.getElementById("descripcion").value.trim();
-  const files = document.getElementById("file").files;
+// ====================== LOGIN ======================
+window.abrirLogin = () => document.getElementById("loginBox").classList.remove("hidden");
+window.cerrarLogin = () => document.getElementById("loginBox").classList.add("hidden");
 
-  if (!nombre || !precio || files.length === 0) {
-    alert("❌ Completa nombre, precio y selecciona al menos una foto");
-    return;
+window.login = async function() {
+  const email = document.getElementById("user").value.trim();
+  const pass = document.getElementById("pass").value.trim();
+
+  try {
+    await signInWithEmailAndPassword(window.auth, email, pass);
+    adminLoggeado = true;
+    cerrarLogin();
+    document.getElementById("adminPanel").classList.remove("hidden");
+    mostrarToast("✅ Bienvenido al Panel Admin");
+    cargarProductos();
+  } catch (e) {
+    alert("❌ Email o contraseña incorrectos");
   }
+};
 
-  const imgs = [];
-  for (let file of files) {
-    const fileName = Date.now() + "-" + file.name;
-    const { error } = await window.supabase.storage.from('imagenes').upload(fileName, file);
-    if (error) return alert("Error subiendo foto");
-    const { data } = window.supabase.storage.from('imagenes').getPublicUrl(fileName);
-    imgs.push(data.publicUrl);
-  }
-
-  const { error } = await window.supabase
-    .from('productos')
-    .insert({ nombre, precio: Number(precio), descripcion, imgs });
-
-  if (error) return alert("Error guardando producto");
-
-  alert("✅ Producto subido correctamente");
-  document.getElementById("nombre").value = "";
-  document.getElementById("precio").value = "";
-  document.getElementById("descripcion").value = "";
-  document.getElementById("file").value = "";
-
-  cargarProductos();
+window.cerrarAdmin = function() {
+  document.getElementById("adminPanel").classList.add("hidden");
+  adminLoggeado = false;
 };
 
 // ====================== CARRITO ======================
-window.agregarAlCarrito = async function(id) {
-  const { data: producto } = await window.supabase.from('productos').select('*').eq('id', id).single();
-  carrito.push(producto);
-  localStorage.setItem("carrito", JSON.stringify(carrito));
-  updateCarrito();
-  alert("✅ Agregado al carrito");
+window.toggleCart = function() {
+  const panel = document.getElementById("carritoPanel");
+  panel.classList.toggle("translate-x-full");
 };
 
-function updateCarrito() {
-  document.getElementById("cartCount").textContent = carrito.length;
-  const itemsDiv = document.getElementById("carritoItems");
-  itemsDiv.innerHTML = carrito.map((p, i) => `
-    <div class="flex gap-4 bg-zinc-800 p-4 rounded-2xl">
-      <img src="${p.imgs[0]}" class="w-16 h-16 object-cover rounded-xl">
-      <div>
-        <p class="font-semibold">${p.nombre}</p>
-        <p class="text-orange-400">$${Number(p.precio).toLocaleString('es-CO')}</p>
-      </div>
-      <button onclick="eliminarDelCarrito(${i})" class="ml-auto text-red-500 text-sm">Eliminar</button>
-    </div>
-  `).join("");
+function actualizarCarrito() {
+  const count = carrito.reduce((acc, item) => acc + (item.cantidad || 1), 0);
+  document.getElementById("cartCount").textContent = count;
 }
+
+window.agregarAlCarrito = function(id) {
+  const prod = productos.find(p => p.id === id);
+  if (!prod) return;
+  const existe = carrito.find(i => i.id === id);
+  if (existe) existe.cantidad++;
+  else carrito.push({ ...prod, cantidad: 1 });
+  localStorage.setItem("carrito", JSON.stringify(carrito));
+  actualizarCarrito();
+  mostrarToast("✅ Agregado al carrito");
+};
+
+function renderCarrito() {
+  const container = document.getElementById("carritoItems");
+  let total = 0;
+
+  container.innerHTML = carrito.map((item, i) => {
+    const subtotal = item.precio * (item.cantidad || 1);
+    total += subtotal;
+    return `
+      <div class="flex gap-4 bg-zinc-800 p-5 rounded-3xl mb-4">
+        <img src="${item.imgs?.[0]}" class="w-20 h-20 object-cover rounded-2xl">
+        <div class="flex-1">
+          <h4 class="font-semibold">${item.nombre}</h4>
+          <p class="text-orange-400">$${new Intl.NumberFormat('es-CO').format(item.precio)}</p>
+          <div class="flex items-center gap-4 mt-4">
+            <button onclick="cambiarCantidad(${i}, -1)" class="w-9 h-9 bg-zinc-700 rounded-2xl">-</button>
+            <span class="font-bold text-lg">${item.cantidad || 1}</span>
+            <button onclick="cambiarCantidad(${i}, 1)" class="w-9 h-9 bg-zinc-700 rounded-2xl">+</button>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="font-bold text-xl">$${new Intl.NumberFormat('es-CO').format(subtotal)}</p>
+          <button onclick="eliminarDelCarrito(${i})" class="text-red-500 mt-6 text-sm">Eliminar</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  document.getElementById("subtotal").textContent = `$${new Intl.NumberFormat('es-CO').format(total)}`;
+}
+
+window.cambiarCantidad = function(i, delta) {
+  carrito[i].cantidad = (carrito[i].cantidad || 1) + delta;
+  if (carrito[i].cantidad < 1) carrito[i].cantidad = 1;
+  localStorage.setItem("carrito", JSON.stringify(carrito));
+  renderCarrito();
+  actualizarCarrito();
+};
 
 window.eliminarDelCarrito = function(i) {
   carrito.splice(i, 1);
   localStorage.setItem("carrito", JSON.stringify(carrito));
-  updateCarrito();
-};
-
-window.toggleCarrito = function() {
-  const el = document.getElementById("carrito");
-  el.classList.toggle("hidden");
-  el.style.transform = el.classList.contains("hidden") ? "translateX(100%)" : "translateX(0)";
+  renderCarrito();
+  actualizarCarrito();
 };
 
 window.comprarPorWhatsApp = function() {
   if (carrito.length === 0) return;
-  let msg = "🛒 *Pedido TechStore*%0A%0A";
-  carrito.forEach(p => msg += `• ${p.nombre} - $${Number(p.precio).toLocaleString('es-CO')}%0A`);
-  msg += `%0ATotal: *$${(carrito.reduce((a, p) => a + Number(p.precio), 0)).toLocaleString('es-CO')}*`;
-  window.open(`https://wa.me/573248777231?text=${msg}`, "_blank");
+  let msg = "🛒 *Nuevo pedido TechStore*\n\n";
+  carrito.forEach(item => {
+    msg += `• ${item.cantidad || 1} × ${item.nombre}\n`;
+  });
+  const total = carrito.reduce((acc, item) => acc + item.precio * (item.cantidad || 1), 0);
+  msg += `\n*Total: $${new Intl.NumberFormat('es-CO').format(total)}*`;
+  window.open(`https://wa.me/573248777231?text=${encodeURIComponent(msg)}`, "_blank");
   carrito = [];
   localStorage.setItem("carrito", JSON.stringify(carrito));
-  updateCarrito();
-  toggleCarrito();
+  renderCarrito();
+  actualizarCarrito();
+  toggleCart();
 };
 
+// ====================== CATÁLOGO Y MODAL ======================
+function renderCatalogo() {
+  const grid = document.getElementById("catalogoGrid");
+  const filtered = productos.filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  grid.innerHTML = filtered.map(p => `
+    <div onclick="verProducto('${p.id}')" class="product-card bg-zinc-900 rounded-3xl overflow-hidden cursor-pointer">
+      <img src="${p.imgs?.[0] || ''}" class="w-full h-64 object-cover">
+      <div class="p-5">
+        <h3 class="font-semibold text-lg">${p.nombre}</h3>
+        <p class="text-orange-400 text-3xl font-bold mt-2">$${new Intl.NumberFormat('es-CO').format(p.precio)}</p>
+      </div>
+    </div>
+  `).join("") || `<p class="col-span-full text-center py-20 text-zinc-400">No se encontraron productos</p>`;
+}
+
+window.verProducto = function(id) {
+  const p = productos.find(x => x.id === id);
+  if (!p) return;
+
+  let currentIndex = 0;
+
+  const modalContent = document.getElementById("modalContent");
+  modalContent.innerHTML = `
+    <div class="p-8">
+      <button onclick="document.getElementById('modal').classList.add('hidden')" class="float-right text-4xl leading-none">×</button>
+      <img id="modalImg" src="${p.imgs[0]}" class="w-full rounded-3xl">
+      <div class="flex justify-between mt-6 text-5xl">
+        <button onclick="cambiarImagenModal(-1)" class="px-4">‹</button>
+        <button onclick="cambiarImagenModal(1)" class="px-4">›</button>
+      </div>
+      <h2 class="text-3xl font-bold mt-8">${p.nombre}</h2>
+      <p class="text-4xl font-bold text-orange-400 mt-3">$${new Intl.NumberFormat('es-CO').format(p.precio)}</p>
+      <p class="mt-8 text-zinc-300 leading-relaxed">${p.descripcion || "Producto de alta calidad"}</p>
+      <button onclick="agregarAlCarrito('${p.id}'); document.getElementById('modal').classList.add('hidden')" class="w-full mt-10 bg-orange-600 py-6 rounded-3xl text-xl font-semibold">🛒 Agregar al carrito</button>
+    </div>
+  `;
+  document.getElementById("modal").classList.remove("hidden");
+
+  window.cambiarImagenModal = function(dir) {
+    currentIndex = (currentIndex + dir + p.imgs.length) % p.imgs.length;
+    document.getElementById("modalImg").src = p.imgs[currentIndex];
+  };
+};
+
+// ====================== TOAST ======================
+function mostrarToast(msg) {
+  const toast = document.getElementById("toast");
+  document.getElementById("toastText").textContent = msg;
+  toast.classList.remove("hidden");
+  setTimeout(() => toast.classList.add("hidden"), 3000);
+}
+
 // ====================== INICIO ======================
-window.onload = () => {
+window.onload = function() {
   cargarProductos();
-  updateCarrito();
+  actualizarCarrito();
   mostrarSeccion("inicio");
+
+  // Búsqueda en tiempo real
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    searchTerm = e.target.value;
+    renderCatalogo();
+  });
 };

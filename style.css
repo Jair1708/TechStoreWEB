@@ -7,10 +7,19 @@ body { font-family: 'Inter', system-ui, sans-serif; }
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .product-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 25px 50px -12px rgb(255 94 0 / 0.3);
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgb(249 115 22 / 0.4);
 }
 
-.tab-active { background-color: #f59e0b; color: white !important; }
-
-.hidden { display: none !important; }
+.slide {
+  min-width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #f59e0b, #ea580c);
+  color: white;
+  text-align: center;
+}
