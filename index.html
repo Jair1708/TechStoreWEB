@@ -74,36 +74,15 @@
       <input id="user" placeholder="Email" class="w-full mb-4 px-6 py-5 bg-zinc-800 rounded-3xl text-white">
       <input id="pass" type="password" placeholder="Contraseña" class="w-full mb-8 px-6 py-5 bg-zinc-800 rounded-3xl text-white">
       <button onclick="login()" class="w-full py-5 bg-orange-600 hover:bg-orange-500 rounded-3xl text-xl font-semibold">ENTRAR</button>
-      <p class="text-xs text-center mt-4 text-zinc-400">admin@techstore.co / TechStore2026</p>
+      <p class="text-xs text-center mt-6 text-zinc-500">Solo para el administrador</p>
     </div>
   </div>
 
   <!-- TOAST -->
   <div id="toast" class="hidden fixed bottom-6 right-6 bg-emerald-600 px-8 py-4 rounded-3xl shadow-2xl text-white">Mensaje</div>
 
-  <!-- FIREBASE -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDTykDD5yoVBzBXjocM0CrkI6Ps2jsUz10",
-      authDomain: "techstore-f79a2.firebaseapp.com",
-      projectId: "techstore-f79a2",
-      storageBucket: "techstore-f79a2.firebasestorage.app",
-      messagingSenderId: "391504606305",
-      appId: "1:391504606305:web:80beb005037d6d2afa2620"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    window.db = getFirestore(app);
-    window.storage = getStorage(app);
-    window.auth = getAuth(app);
-    window.fb = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, ref, uploadBytes, getDownloadURL };
-  </script>
-
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>

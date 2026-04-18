@@ -2,17 +2,26 @@ let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let searchTerm = "";
 
+// ==================== CONFIGURA SUPABASE AQUÍ ====================
+const SUPABASE_URL = "https://jairandresospina12@gmail.com"
+const SUPABASE_ANON_KEY = "1070601857"
+
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ================================================================
+
 // ====================== CARGAR PRODUCTOS ======================
 async function cargarProductos() {
-  const snapshot = await fb.getDocs(fb.collection(db, "productos"));
-  productos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const { data, error } = await supabase.from('productos').select('*');
+  if (error) return console.error(error);
+  productos = data || [];
   renderCatalogo();
 }
 
 // ====================== NAVEGACIÓN ======================
 window.mostrarSeccion = function(id) {
   document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
+  const section = document.getElementById(id);
+  if (section) section.classList.remove("hidden");
 };
 
 // ====================== LOGIN ======================
@@ -22,14 +31,16 @@ window.cerrarLogin = () => document.getElementById("loginBox").classList.add("hi
 window.login = async function() {
   const email = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
-  try {
-    await signInWithEmailAndPassword(window.auth, email, pass);
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+
+  if (error) {
+    alert("❌ Email o contraseña incorrectos");
+  } else {
     cerrarLogin();
     document.getElementById("adminPanel").classList.remove("hidden");
     renderAdmin();
     mostrarToast("✅ Bienvenido Admin");
-  } catch (e) {
-    alert("❌ Email o contraseña incorrectos");
   }
 };
 
@@ -100,7 +111,7 @@ window.comprarPorWhatsApp = function() {
   toggleCart();
 };
 
-// ====================== CATÁLOGO (solo foto, nombre y precio con descuento) ======================
+// ====================== CATÁLOGO ======================
 function renderCatalogo() {
   const grid = document.getElementById("catalogoGrid");
   const filtered = productos.filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -119,7 +130,15 @@ function renderCatalogo() {
   `).join("") || `<p class="text-center py-12 text-zinc-400 col-span-full">No hay productos aún</p>`;
 }
 
-// ====================== MODAL DETALLADO ======================
+function initSearch() {
+  const searchInput = document.getElementById("searchInput");
+  searchInput.addEventListener("input", (e) => {
+    searchTerm = e.target.value;
+    renderCatalogo();
+  });
+}
+
+// ====================== MODAL ======================
 window.verProducto = function(id) {
   const p = productos.find(x => x.id === id);
   if (!p) return;
@@ -130,24 +149,19 @@ window.verProducto = function(id) {
   modalContent.innerHTML = `
     <div class="p-8">
       <button onclick="document.getElementById('modal').classList.add('hidden')" class="float-right text-4xl">×</button>
-      
       <img id="modalImg" src="${p.imgs[0]}" class="w-full rounded-3xl mb-6">
       <div class="flex justify-between text-5xl mb-6">
         <button onclick="cambiarImg(-1)">‹</button>
         <button onclick="cambiarImg(1)">›</button>
       </div>
-
       <h2 class="text-3xl font-bold">${p.nombre}</h2>
       <div class="flex items-baseline gap-3 mt-3">
         <span class="text-4xl font-bold">$${new Intl.NumberFormat('es-CO').format(p.precio)}</span>
         ${p.old ? `<span class="text-zinc-400 line-through">$${new Intl.NumberFormat('es-CO').format(p.old)}</span>` : ''}
       </div>
-
       <p class="mt-6 text-zinc-300">${p.descripcion || ""}</p>
-
       <button onclick="agregarAlCarrito('${p.id}'); document.getElementById('modal').classList.add('hidden')" 
               class="w-full mt-8 bg-orange-600 py-6 rounded-3xl text-xl font-semibold">🛒 Agregar al carrito</button>
-      
       <button onclick="comprarDirecto('${p.id}')" 
               class="w-full mt-3 bg-white text-black py-6 rounded-3xl text-xl font-semibold">📲 Comprar ahora por WhatsApp</button>
     </div>
@@ -203,10 +217,21 @@ async function agregarProductoAdmin() {
 
   const imgs = [];
   for (let file of files) {
-    const storageRef = fb.ref(window.storage, `productos/${Date.now()}-${file.name}`);
-    await fb.uploadBytes(storageRef, file);
-    const url = await fb.getDownloadURL(storageRef);
-    imgs.push(url);
+    const fileName = `${Date.now()}-${file.name}`;
+    const { error: uploadError } = await supabase.storage
+      .from('productos')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error(uploadError);
+      return alert("Error al subir la imagen");
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('productos')
+      .getPublicUrl(fileName);
+
+    imgs.push(urlData.publicUrl);
   }
 
   const nuevo = {
@@ -217,19 +242,28 @@ async function agregarProductoAdmin() {
     imgs: imgs
   };
 
-  await fb.addDoc(fb.collection(db, "productos"), nuevo);
-  mostrarToast("Producto agregado");
-  cargarProductos();
-  renderAdmin();
-}
-
-async function eliminarProducto(id) {
-  if (confirm("¿Eliminar este producto?")) {
-    await fb.deleteDoc(fb.doc(db, "productos", id));
+  const { error } = await supabase.from('productos').insert(nuevo);
+  if (error) alert(error.message);
+  else {
+    mostrarToast("✅ Producto agregado");
     cargarProductos();
     renderAdmin();
   }
 }
+
+window.eliminarProducto = async function(id) {
+  if (confirm("¿Eliminar este producto?")) {
+    const { error } = await supabase.from('productos').delete().eq('id', id);
+    if (!error) {
+      cargarProductos();
+      renderAdmin();
+    }
+  }
+};
+
+window.editarProducto = function(id) {
+  alert("🚧 Editar producto en desarrollo.\nPor ahora elimina y vuelve a crear.");
+};
 
 // ====================== TOAST ======================
 function mostrarToast(msg) {
@@ -243,4 +277,5 @@ function mostrarToast(msg) {
 window.onload = function() {
   cargarProductos();
   actualizarCarrito();
+  initSearch();
 };
