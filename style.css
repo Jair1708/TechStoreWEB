@@ -1,3 +1,13 @@
-.hidden { display: none !important; }
-.product-card { transition: all 0.3s ease; }
-.product-card:hover { transform: translateY(-5px); border-color: #f97316; }
+.hidden {
+  display: none !important;
+}
+
+.product-card {
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  border-color: #f97316;
+  box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.2);
+}
