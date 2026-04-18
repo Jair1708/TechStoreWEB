@@ -1,19 +1,19 @@
+// ====================== CONFIGURACIÓN SUPABASE ======================
+const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";     // ← CAMBIA ESTO
+const SUPABASE_ANON_KEY = "eyJhbGciOi...";                  // ← CAMBIA ESTO (tu anon key)
+
+const { createClient } = Supabase;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ==================================================================
+
 let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let searchTerm = "";
 
-// ==================== CONFIGURA SUPABASE ====================
-const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";   // ← CAMBIA
-const SUPABASE_ANON_KEY = "eyJhbGciOi...";                // ← CAMBIA (tu anon key)
-
-const { createClient } = Supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// ==========================================================
-
 // ====================== CARGAR PRODUCTOS ======================
 async function cargarProductos() {
   const { data, error } = await supabase.from('productos').select('*');
-  if (error) return console.error(error);
+  if (error) return console.error("Error cargando productos:", error);
   productos = data || [];
   renderCatalogo();
 }
