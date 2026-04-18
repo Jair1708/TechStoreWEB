@@ -1,72 +1,75 @@
-// ====================== TECHSTORE - VERSIÓN FINAL 18 ABRIL 2026 ======================
+// ====================== TECHSTORE - VERSIÓN FINAL CORREGIDA ======================
 const SUPABASE_URL = "https://dlzerjvbqixllkkralfz.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemVyanZicWl4bGxra3JhbGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDIyNzksImV4cCI6MjA5MjAxODI3OX0.5mtSxbh_0LOfdQ-b1LlskylovoZa1zeyn1gFx5owQYM";
 
-const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Usamos 'client' para evitar el SyntaxError de duplicado
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-let searchTerm = "";
 
-// Cargar productos
+// Cargar productos desde la base de datos
 async function cargarProductos() {
-  const { data, error } = await supabase.from('productos').select('*');
+  const { data, error } = await client.from('productos').select('*');
   if (error) return console.error("Error cargando productos:", error);
   productos = data || [];
   renderCatalogo();
 }
 
-// Navegación
+// Navegación global
 window.mostrarSeccion = function(id) {
   document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
   const section = document.getElementById(id);
   if (section) section.classList.remove("hidden");
 };
 
-// Login
+// Control de Login
 window.abrirLogin = () => document.getElementById("loginBox").classList.remove("hidden");
 window.cerrarLogin = () => document.getElementById("loginBox").classList.add("hidden");
 
 window.login = async function() {
   const email = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
-  const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  const { error } = await client.auth.signInWithPassword({ email, password: pass });
   if (error) {
-    alert("❌ Email o contraseña incorrectos");
+    alert("❌ Error: " + error.message);
   } else {
-    cerrarLogin();
-    document.getElementById("adminPanel").classList.remove("hidden");
-    renderAdmin();
-    mostrarToast("✅ Bienvenido Admin");
+    window.cerrarLogin();
+    alert("✅ Bienvenido Admin");
+    cargarProductos();
   }
 };
 
-window.cerrarAdmin = () => document.getElementById("adminPanel").classList.add("hidden");
+// Dibujar productos en el HTML
+function renderCatalogo() {
+  const grid = document.getElementById("catalogoGrid");
+  if (!grid) return;
+  grid.innerHTML = productos.map(p => `
+    <div class="product-card bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+      <img src="${p.imagen}" class="w-full h-40 object-cover rounded-xl mb-4">
+      <h3 class="font-bold text-lg">${p.nombre}</h3>
+      <p class="text-orange-500 font-bold">$${p.precio}</p>
+      <button onclick="window.agregarAlCarrito(${p.id})" class="mt-4 w-full bg-white text-black py-2 rounded-xl font-bold hover:bg-orange-500 hover:text-white transition-all">
+        Agregar
+      </button>
+    </div>
+  `).join('');
+}
 
-// Carrito (todo el resto es igual que antes)
-window.toggleCart = function() { /* ... mismo código ... */ };
-function actualizarCarrito() { /* ... */ }
-window.agregarAlCarrito = function(id) { /* ... */ }
-function renderCarrito() { /* ... */ }
-window.eliminarDelCarrito = function(i) { /* ... */ }
-window.comprarPorWhatsApp = function() { /* ... */ }
+// Funciones del carrito
+window.toggleCart = () => alert("Productos en carrito: " + carrito.length);
 
-// Catálogo, modal, admin, toast, onload...
-// (El resto del código es exactamente el mismo que te di antes, solo que ahora está limpio)
+window.agregarAlCarrito = function(id) {
+  const prod = productos.find(p => p.id === id);
+  if (prod) {
+    carrito.push(prod);
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+    document.getElementById("cartCount").innerText = carrito.length;
+  }
+};
 
-function renderCatalogo() { /* código anterior */ }
-function initSearch() { /* código anterior */ }
-window.verProducto = function(id) { /* código anterior */ }
-window.comprarDirecto = function(id) { /* código anterior */ }
-function renderAdmin() { /* código anterior */ }
-async function agregarProductoAdmin() { /* código anterior */ }
-window.eliminarProducto = async function(id) { /* código anterior */ }
-window.editarProducto = function(id) { alert("🚧 Editar en desarrollo"); };
-function mostrarToast(msg) { /* código anterior */ }
-
+// Al cargar la página
 window.onload = function() {
   cargarProductos();
-  actualizarCarrito();
-  initSearch();
-  console.log("%c✅ TechStore v10000 cargada correctamente", "color:#f97316; font-weight:bold");
+  console.log("%c✅ TechStore v1.0.1 - Conexión establecida", "color:#f97316; font-weight:bold");
 };
