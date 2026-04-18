@@ -2,12 +2,13 @@ let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let searchTerm = "";
 
-// ==================== CONFIGURA SUPABASE AQUÍ ====================
-const SUPABASE_URL = "https://jairandresospina12@gmail.com"
-const SUPABASE_ANON_KEY = "1070601857"
+// ==================== CONFIGURA SUPABASE ====================
+const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";   // ← CAMBIA
+const SUPABASE_ANON_KEY = "eyJhbGciOi...";                // ← CAMBIA (tu anon key)
 
-const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// ================================================================
+const { createClient } = Supabase;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ==========================================================
 
 // ====================== CARGAR PRODUCTOS ======================
 async function cargarProductos() {
@@ -33,7 +34,6 @@ window.login = async function() {
   const pass = document.getElementById("pass").value.trim();
 
   const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
-
   if (error) {
     alert("❌ Email o contraseña incorrectos");
   } else {
@@ -218,19 +218,10 @@ async function agregarProductoAdmin() {
   const imgs = [];
   for (let file of files) {
     const fileName = `${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage
-      .from('productos')
-      .upload(fileName, file);
+    const { error: uploadError } = await supabase.storage.from('productos').upload(fileName, file);
+    if (uploadError) return alert("Error al subir imagen");
 
-    if (uploadError) {
-      console.error(uploadError);
-      return alert("Error al subir la imagen");
-    }
-
-    const { data: urlData } = supabase.storage
-      .from('productos')
-      .getPublicUrl(fileName);
-
+    const { data: urlData } = supabase.storage.from('productos').getPublicUrl(fileName);
     imgs.push(urlData.publicUrl);
   }
 
@@ -262,7 +253,7 @@ window.eliminarProducto = async function(id) {
 };
 
 window.editarProducto = function(id) {
-  alert("🚧 Editar producto en desarrollo.\nPor ahora elimina y vuelve a crear.");
+  alert("🚧 Editar en desarrollo (por ahora elimina y crea de nuevo)");
 };
 
 // ====================== TOAST ======================
