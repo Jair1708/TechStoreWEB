@@ -1,7 +1,6 @@
 // ====================== CONFIGURACIÓN SUPABASE (TU PROYECTO) ======================
 const SUPABASE_URL = "https://dlzerjvbqixllkkralfz.supabase.co";
-const SUPABASE_ANON_KEY = "PEGA_AQUÍ_TU_ANON_KEY";   // ← CAMBIA ESTO (ver paso 3)
-
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemVyanZicWl4bGxra3JhbGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDIyNzksImV4cCI6MjA5MjAxODI3OX0.5mtSxbh_0LOfdQ-b1LlskylovoZa1zeyn1gFx5owQYM";
 const { createClient } = Supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // =================================================================================
