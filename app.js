@@ -1,21 +1,17 @@
 let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-let adminLoggeado = false;
 let searchTerm = "";
 
 // ====================== CARGAR PRODUCTOS ======================
 async function cargarProductos() {
-  const querySnapshot = await fb.getDocs(fb.collection(db, "productos"));
-  productos = [];
-  querySnapshot.forEach(doc => {
-    productos.push({ id: doc.id, ...doc.data() });
-  });
+  const snapshot = await fb.getDocs(fb.collection(db, "productos"));
+  productos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   renderCatalogo();
 }
 
 // ====================== NAVEGACIÓN ======================
 window.mostrarSeccion = function(id) {
-  document.querySelectorAll(".seccion").forEach(s => s.classList.add("hidden"));
+  document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 };
 
@@ -26,23 +22,18 @@ window.cerrarLogin = () => document.getElementById("loginBox").classList.add("hi
 window.login = async function() {
   const email = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
-
   try {
     await signInWithEmailAndPassword(window.auth, email, pass);
-    adminLoggeado = true;
     cerrarLogin();
     document.getElementById("adminPanel").classList.remove("hidden");
-    mostrarToast("✅ Bienvenido al Panel Admin");
-    cargarProductos();
+    renderAdmin();
+    mostrarToast("✅ Bienvenido Admin");
   } catch (e) {
     alert("❌ Email o contraseña incorrectos");
   }
 };
 
-window.cerrarAdmin = function() {
-  document.getElementById("adminPanel").classList.add("hidden");
-  adminLoggeado = false;
-};
+window.cerrarAdmin = () => document.getElementById("adminPanel").classList.add("hidden");
 
 // ====================== CARRITO ======================
 window.toggleCart = function() {
@@ -51,7 +42,7 @@ window.toggleCart = function() {
 };
 
 function actualizarCarrito() {
-  const count = carrito.reduce((acc, item) => acc + (item.cantidad || 1), 0);
+  const count = carrito.reduce((a, b) => a + (b.cantidad || 1), 0);
   document.getElementById("cartCount").textContent = count;
 }
 
@@ -69,39 +60,24 @@ window.agregarAlCarrito = function(id) {
 function renderCarrito() {
   const container = document.getElementById("carritoItems");
   let total = 0;
-
   container.innerHTML = carrito.map((item, i) => {
     const subtotal = item.precio * (item.cantidad || 1);
     total += subtotal;
     return `
-      <div class="flex gap-4 bg-zinc-800 p-5 rounded-3xl mb-4">
-        <img src="${item.imgs?.[0]}" class="w-20 h-20 object-cover rounded-2xl">
+      <div class="flex gap-4 bg-zinc-800 p-4 rounded-3xl mb-4">
+        <img src="${item.imgs[0]}" class="w-20 h-20 object-cover rounded-2xl">
         <div class="flex-1">
-          <h4 class="font-semibold">${item.nombre}</h4>
+          <h4>${item.nombre}</h4>
           <p class="text-orange-400">$${new Intl.NumberFormat('es-CO').format(item.precio)}</p>
-          <div class="flex items-center gap-4 mt-4">
-            <button onclick="cambiarCantidad(${i}, -1)" class="w-9 h-9 bg-zinc-700 rounded-2xl">-</button>
-            <span class="font-bold text-lg">${item.cantidad || 1}</span>
-            <button onclick="cambiarCantidad(${i}, 1)" class="w-9 h-9 bg-zinc-700 rounded-2xl">+</button>
-          </div>
         </div>
         <div class="text-right">
-          <p class="font-bold text-xl">$${new Intl.NumberFormat('es-CO').format(subtotal)}</p>
-          <button onclick="eliminarDelCarrito(${i})" class="text-red-500 mt-6 text-sm">Eliminar</button>
+          <p class="font-bold">$${new Intl.NumberFormat('es-CO').format(subtotal)}</p>
+          <button onclick="eliminarDelCarrito(${i})" class="text-red-500 text-sm mt-2">Eliminar</button>
         </div>
       </div>`;
   }).join("");
-
-  document.getElementById("subtotal").textContent = `$${new Intl.NumberFormat('es-CO').format(total)}`;
+  document.getElementById("subtotal").innerHTML = `$${new Intl.NumberFormat('es-CO').format(total)}`;
 }
-
-window.cambiarCantidad = function(i, delta) {
-  carrito[i].cantidad = (carrito[i].cantidad || 1) + delta;
-  if (carrito[i].cantidad < 1) carrito[i].cantidad = 1;
-  localStorage.setItem("carrito", JSON.stringify(carrito));
-  renderCarrito();
-  actualizarCarrito();
-};
 
 window.eliminarDelCarrito = function(i) {
   carrito.splice(i, 1);
@@ -112,11 +88,9 @@ window.eliminarDelCarrito = function(i) {
 
 window.comprarPorWhatsApp = function() {
   if (carrito.length === 0) return;
-  let msg = "🛒 *Nuevo pedido TechStore*\n\n";
-  carrito.forEach(item => {
-    msg += `• ${item.cantidad || 1} × ${item.nombre}\n`;
-  });
-  const total = carrito.reduce((acc, item) => acc + item.precio * (item.cantidad || 1), 0);
+  let msg = "🛒 *Pedido TechStore*\n\n";
+  carrito.forEach(item => msg += `• ${item.cantidad || 1} × ${item.nombre}\n`);
+  const total = carrito.reduce((a, b) => a + b.precio * (b.cantidad || 1), 0);
   msg += `\n*Total: $${new Intl.NumberFormat('es-CO').format(total)}*`;
   window.open(`https://wa.me/573248777231?text=${encodeURIComponent(msg)}`, "_blank");
   carrito = [];
@@ -126,68 +100,147 @@ window.comprarPorWhatsApp = function() {
   toggleCart();
 };
 
-// ====================== CATÁLOGO Y MODAL ======================
+// ====================== CATÁLOGO (solo foto, nombre y precio con descuento) ======================
 function renderCatalogo() {
   const grid = document.getElementById("catalogoGrid");
   const filtered = productos.filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
 
   grid.innerHTML = filtered.map(p => `
     <div onclick="verProducto('${p.id}')" class="product-card bg-zinc-900 rounded-3xl overflow-hidden cursor-pointer">
-      <img src="${p.imgs?.[0] || ''}" class="w-full h-64 object-cover">
+      <img src="${p.imgs[0]}" class="w-full h-64 object-cover">
       <div class="p-5">
         <h3 class="font-semibold text-lg">${p.nombre}</h3>
-        <p class="text-orange-400 text-3xl font-bold mt-2">$${new Intl.NumberFormat('es-CO').format(p.precio)}</p>
+        <div class="flex items-baseline gap-3 mt-2">
+          <span class="text-3xl font-bold">$${new Intl.NumberFormat('es-CO').format(p.precio)}</span>
+          ${p.old ? `<span class="text-zinc-400 line-through text-sm">$${new Intl.NumberFormat('es-CO').format(p.old)}</span>` : ''}
+        </div>
       </div>
     </div>
-  `).join("") || `<p class="col-span-full text-center py-20 text-zinc-400">No se encontraron productos</p>`;
+  `).join("") || `<p class="text-center py-12 text-zinc-400 col-span-full">No hay productos aún</p>`;
 }
 
+// ====================== MODAL DETALLADO ======================
 window.verProducto = function(id) {
   const p = productos.find(x => x.id === id);
   if (!p) return;
 
-  let currentIndex = 0;
-
+  let index = 0;
   const modalContent = document.getElementById("modalContent");
+
   modalContent.innerHTML = `
     <div class="p-8">
-      <button onclick="document.getElementById('modal').classList.add('hidden')" class="float-right text-4xl leading-none">×</button>
-      <img id="modalImg" src="${p.imgs[0]}" class="w-full rounded-3xl">
-      <div class="flex justify-between mt-6 text-5xl">
-        <button onclick="cambiarImagenModal(-1)" class="px-4">‹</button>
-        <button onclick="cambiarImagenModal(1)" class="px-4">›</button>
+      <button onclick="document.getElementById('modal').classList.add('hidden')" class="float-right text-4xl">×</button>
+      
+      <img id="modalImg" src="${p.imgs[0]}" class="w-full rounded-3xl mb-6">
+      <div class="flex justify-between text-5xl mb-6">
+        <button onclick="cambiarImg(-1)">‹</button>
+        <button onclick="cambiarImg(1)">›</button>
       </div>
-      <h2 class="text-3xl font-bold mt-8">${p.nombre}</h2>
-      <p class="text-4xl font-bold text-orange-400 mt-3">$${new Intl.NumberFormat('es-CO').format(p.precio)}</p>
-      <p class="mt-8 text-zinc-300 leading-relaxed">${p.descripcion || "Producto de alta calidad"}</p>
-      <button onclick="agregarAlCarrito('${p.id}'); document.getElementById('modal').classList.add('hidden')" class="w-full mt-10 bg-orange-600 py-6 rounded-3xl text-xl font-semibold">🛒 Agregar al carrito</button>
+
+      <h2 class="text-3xl font-bold">${p.nombre}</h2>
+      <div class="flex items-baseline gap-3 mt-3">
+        <span class="text-4xl font-bold">$${new Intl.NumberFormat('es-CO').format(p.precio)}</span>
+        ${p.old ? `<span class="text-zinc-400 line-through">$${new Intl.NumberFormat('es-CO').format(p.old)}</span>` : ''}
+      </div>
+
+      <p class="mt-6 text-zinc-300">${p.descripcion || ""}</p>
+
+      <button onclick="agregarAlCarrito('${p.id}'); document.getElementById('modal').classList.add('hidden')" 
+              class="w-full mt-8 bg-orange-600 py-6 rounded-3xl text-xl font-semibold">🛒 Agregar al carrito</button>
+      
+      <button onclick="comprarDirecto('${p.id}')" 
+              class="w-full mt-3 bg-white text-black py-6 rounded-3xl text-xl font-semibold">📲 Comprar ahora por WhatsApp</button>
     </div>
   `;
+
   document.getElementById("modal").classList.remove("hidden");
 
-  window.cambiarImagenModal = function(dir) {
-    currentIndex = (currentIndex + dir + p.imgs.length) % p.imgs.length;
-    document.getElementById("modalImg").src = p.imgs[currentIndex];
+  window.cambiarImg = function(dir) {
+    index = (index + dir + p.imgs.length) % p.imgs.length;
+    document.getElementById("modalImg").src = p.imgs[index];
   };
 };
 
+window.comprarDirecto = function(id) {
+  const p = productos.find(x => x.id === id);
+  const msg = `Quiero comprar: ${p.nombre} - $${new Intl.NumberFormat('es-CO').format(p.precio)}`;
+  window.open(`https://wa.me/573248777231?text=${encodeURIComponent(msg)}`, "_blank");
+  document.getElementById("modal").classList.add("hidden");
+};
+
+// ====================== ADMIN ======================
+function renderAdmin() {
+  const formHTML = `
+    <h3 class="text-2xl font-bold mb-6">Agregar nuevo producto</h3>
+    <input id="nombre" placeholder="Nombre" class="w-full mb-4 p-4 border rounded-3xl">
+    <div class="grid grid-cols-2 gap-4">
+      <input id="precio" type="number" placeholder="Precio" class="p-4 border rounded-3xl">
+      <input id="old" type="number" placeholder="Precio anterior" class="p-4 border rounded-3xl">
+    </div>
+    <textarea id="descripcion" placeholder="Descripción" class="w-full mt-4 p-4 border rounded-3xl h-28"></textarea>
+    <input id="fileInput" type="file" multiple accept="image/*" class="w-full mt-4 p-4 border rounded-3xl">
+    <button onclick="agregarProductoAdmin()" class="w-full mt-6 bg-black text-white py-5 rounded-3xl">Agregar producto</button>
+  `;
+  document.getElementById("adminForm").innerHTML = formHTML;
+
+  const listaHTML = productos.map(p => `
+    <div class="flex justify-between items-center border-b py-4">
+      <div>
+        <img src="${p.imgs[0]}" class="w-12 h-12 object-cover rounded-xl inline-block mr-3">
+        <span class="font-semibold">${p.nombre}</span>
+      </div>
+      <div>
+        <button onclick="editarProducto('${p.id}')" class="text-blue-600 mr-4">Editar</button>
+        <button onclick="eliminarProducto('${p.id}')" class="text-red-600">Eliminar</button>
+      </div>
+    </div>`).join("");
+  document.getElementById("listaAdmin").innerHTML = `<h3 class="font-bold mb-4">Productos (${productos.length})</h3>` + listaHTML;
+}
+
+async function agregarProductoAdmin() {
+  const files = document.getElementById("fileInput").files;
+  if (files.length === 0) return alert("Sube al menos una foto");
+
+  const imgs = [];
+  for (let file of files) {
+    const storageRef = fb.ref(window.storage, `productos/${Date.now()}-${file.name}`);
+    await fb.uploadBytes(storageRef, file);
+    const url = await fb.getDownloadURL(storageRef);
+    imgs.push(url);
+  }
+
+  const nuevo = {
+    nombre: document.getElementById("nombre").value,
+    precio: Number(document.getElementById("precio").value),
+    old: Number(document.getElementById("old").value) || null,
+    descripcion: document.getElementById("descripcion").value,
+    imgs: imgs
+  };
+
+  await fb.addDoc(fb.collection(db, "productos"), nuevo);
+  mostrarToast("Producto agregado");
+  cargarProductos();
+  renderAdmin();
+}
+
+async function eliminarProducto(id) {
+  if (confirm("¿Eliminar este producto?")) {
+    await fb.deleteDoc(fb.doc(db, "productos", id));
+    cargarProductos();
+    renderAdmin();
+  }
+}
+
 // ====================== TOAST ======================
 function mostrarToast(msg) {
-  const toast = document.getElementById("toast");
-  document.getElementById("toastText").textContent = msg;
-  toast.classList.remove("hidden");
-  setTimeout(() => toast.classList.add("hidden"), 3000);
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.remove("hidden");
+  setTimeout(() => t.classList.add("hidden"), 3000);
 }
 
 // ====================== INICIO ======================
 window.onload = function() {
   cargarProductos();
   actualizarCarrito();
-  mostrarSeccion("inicio");
-
-  // Búsqueda en tiempo real
-  document.getElementById("searchInput").addEventListener("input", (e) => {
-    searchTerm = e.target.value;
-    renderCatalogo();
-  });
 };
