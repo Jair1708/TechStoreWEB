@@ -12,68 +12,59 @@
 
   <header class="bg-black sticky top-0 z-50 border-b border-zinc-800">
     <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-      <h1 onclick="mostrarSeccion('inicio')" class="text-3xl font-bold cursor-pointer flex items-center gap-2">🔥 TechStore</h1>
+      <h1 onclick="mostrarSeccion('inicio')" class="text-3xl font-bold cursor-pointer">🔥 TechStore</h1>
       <nav class="flex gap-8 text-sm font-medium">
         <button onclick="mostrarSeccion('inicio')">Inicio</button>
         <button onclick="mostrarSeccion('catalogo')">Catálogo</button>
-        <button onclick="abrirLogin()" class="bg-orange-600 hover:bg-orange-500 px-6 py-2 rounded-3xl transition-all">👤 Admin</button>
+        <button onclick="abrirLogin()" class="bg-orange-600 px-6 py-2 rounded-3xl">👤 Admin</button>
       </nav>
-      <button onclick="toggleCart()" class="flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 px-6 py-3 rounded-3xl">
+      <button onclick="toggleCart()" class="relative bg-zinc-900 p-3 rounded-full">
         <i class="fa-solid fa-cart-shopping"></i>
-        <span id="cartCount" class="bg-orange-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
+        <span id="cartCount" class="absolute -top-1 -right-1 bg-orange-500 text-[10px] w-5 h-5 flex items-center justify-center rounded-full">0</span>
       </button>
     </div>
   </header>
 
-  <section id="inicio" class="max-w-7xl mx-auto px-6 py-20 text-center">
-    <h2 class="text-6xl font-extrabold mb-4">Lo último en tecnología</h2>
+  <section id="inicio" class="py-20 text-center">
+    <h2 class="text-6xl font-bold">Bienvenido</h2>
   </section>
 
-  <section id="catalogo" class="max-w-7xl mx-auto px-6 py-12 hidden">
-    <h2 class="text-4xl font-bold mb-8">Nuestros productos</h2>
-    <input id="searchInput" type="text" placeholder="🔎 Buscar producto..." class="w-full md:w-96 bg-zinc-900 border border-zinc-800 rounded-3xl px-6 py-4 mb-8 outline-none focus:border-orange-500">
-    <div id="catalogoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+  <section id="catalogo" class="max-w-7xl mx-auto p-6 hidden">
+    <input id="searchInput" type="text" placeholder="Buscar..." class="w-full max-w-md bg-zinc-900 p-4 rounded-2xl mb-8 border border-zinc-800">
+    <div id="catalogoGrid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
   </section>
 
   <div id="loginBox" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100]">
     <div class="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 w-80">
-      <h3 class="text-xl font-bold mb-4 text-orange-500 text-center">Acceso Admin</h3>
-      <input id="user" type="email" placeholder="Email" class="w-full bg-black border border-zinc-800 p-3 mb-2 rounded-xl outline-none focus:border-orange-500 text-white">
-      <input id="pass" type="password" placeholder="Contraseña" class="w-full bg-black border border-zinc-800 p-3 mb-4 rounded-xl outline-none focus:border-orange-500 text-white">
-      <button onclick="login()" class="w-full bg-orange-600 py-3 rounded-xl font-bold hover:bg-orange-500">Entrar</button>
-      <button onclick="cerrarLogin()" class="w-full mt-4 text-zinc-500 text-sm">Cancelar</button>
+      <input id="user" type="email" placeholder="Email" class="w-full bg-black p-3 mb-2 rounded-xl">
+      <input id="pass" type="password" placeholder="Contraseña" class="w-full bg-black p-3 mb-4 rounded-xl">
+      <button onclick="login()" class="w-full bg-orange-600 py-3 rounded-xl font-bold">Entrar</button>
+      <button onclick="cerrarLogin()" class="w-full mt-4 text-xs">Cancelar</button>
     </div>
   </div>
 
-  <div id="adminPanel" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[110] overflow-y-auto p-4">
-    <div class="bg-zinc-900 border border-zinc-800 w-full max-w-lg p-8 rounded-3xl shadow-2xl">
-      <h2 class="text-2xl font-bold text-orange-500 mb-6">Agregar Producto Local</h2>
-      <input id="pNombre" type="text" placeholder="Nombre" class="w-full bg-black border border-zinc-800 p-3 mb-3 rounded-xl outline-none">
-      <input id="pPrecio" type="number" placeholder="Precio" class="w-full bg-black border border-zinc-800 p-3 mb-3 rounded-xl outline-none">
-      <textarea id="pDesc" placeholder="Descripción" class="w-full bg-black border border-zinc-800 p-3 mb-3 rounded-xl h-24 outline-none"></textarea>
-      <div class="mb-6">
-        <label class="block text-xs text-zinc-500 mb-2">📸 FOTO DESDE EL PC:</label>
-        <input id="pArchivo" type="file" accept="image/*" class="w-full text-sm">
-      </div>
+  <div id="adminPanel" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[110] p-4">
+    <div class="bg-zinc-900 border border-zinc-800 w-full max-w-lg p-8 rounded-3xl">
+      <h2 class="text-2xl font-bold text-orange-500 mb-6">Nuevo Producto</h2>
+      <input id="pNombre" type="text" placeholder="Nombre" class="w-full bg-black p-3 mb-3 rounded-xl">
+      <input id="pPrecio" type="number" placeholder="Precio" class="w-full bg-black p-3 mb-3 rounded-xl">
+      <textarea id="pDesc" placeholder="Descripción" class="w-full bg-black p-3 mb-3 rounded-xl h-24"></textarea>
+      <input id="pArchivo" type="file" accept="image/*" class="w-full text-sm mb-6">
       <div class="flex gap-4">
-        <button onclick="guardarProducto()" class="flex-1 bg-orange-600 py-3 rounded-xl font-bold hover:bg-orange-500">Subir y Guardar</button>
+        <button onclick="guardarProducto()" class="flex-1 bg-orange-600 py-3 rounded-xl font-bold">Publicar</button>
         <button onclick="cerrarAdmin()" class="flex-1 bg-zinc-800 py-3 rounded-xl font-bold">Cerrar</button>
       </div>
     </div>
   </div>
 
-  <div id="cartPanel" class="fixed top-0 right-0 h-full w-80 bg-zinc-900 border-l border-zinc-800 z-[200] translate-x-full transition-transform duration-300 p-6 flex flex-col">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-bold">Tu Carrito</h2>
-      <button onclick="toggleCart()" class="text-zinc-500 hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
-    </div>
+  <div id="cartPanel" class="fixed top-0 right-0 h-full w-80 bg-zinc-900 border-l border-zinc-800 z-[200] translate-x-full transition-transform duration-300 p-6 flex flex-col shadow-2xl">
+    <h2 class="text-xl font-bold mb-6">Carrito</h2>
     <div id="cartItems" class="flex-1 overflow-y-auto"></div>
-    <button onclick="comprarPorWhatsApp()" class="w-full bg-green-600 py-4 rounded-2xl font-bold mt-4 flex items-center justify-center gap-2">
-      <i class="fa-brands fa-whatsapp text-xl"></i> Finalizar Pedido
-    </button>
+    <button onclick="comprarPorWhatsApp()" class="w-full bg-green-600 py-4 rounded-2xl font-bold mt-4">WhatsApp</button>
+    <button onclick="toggleCart()" class="mt-2 text-xs text-zinc-500">Cerrar</button>
   </div>
 
-  <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-orange-600 text-white px-8 py-3 rounded-full font-bold shadow-2xl transition-all duration-500 translate-y-20 opacity-0 z-[300]"></div>
+  <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-orange-600 text-white px-8 py-3 rounded-full font-bold transition-all duration-500 translate-y-20 opacity-0 z-[300]"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>

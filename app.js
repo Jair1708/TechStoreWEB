@@ -1,17 +1,18 @@
+// ====================== TECHSTORE - VERSIÓN FINAL CORREGIDA ======================
 const SUPABASE_URL = "https://dlzerjvbqixllkkralfz.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemVyanZicWl4bGxra3JhbGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDIyNzksImV4cCI6MjA5MjAxODI3OX0.5mtSxbh_0LOfdQ-b1LlskylovoZa1zeyn1gFx5owQYM";
 
-// Cambiamos el nombre de la variable para evitar el error de "already declared"
+// Usamos 'client' para evitar errores de duplicidad
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let searchTerm = "";
 
-// --- CARGA DE DATOS ---
+// --- CARGAR PRODUCTOS ---
 async function cargarProductos() {
   const { data, error } = await client.from('productos').select('*');
-  if (error) return console.error("Error:", error);
+  if (error) return console.error("Error cargando productos:", error);
   productos = data || [];
   renderCatalogo();
 }
@@ -33,15 +34,28 @@ function renderCatalogo() {
   `).join('');
 }
 
-// --- NAVEGACIÓN (Asignadas a window para evitar ReferenceError) ---
+// --- NAVEGACIÓN Y LOGIN ---
 window.mostrarSeccion = (id) => {
   document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
+  const section = document.getElementById(id);
+  if (section) section.classList.remove("hidden");
 };
 
 window.abrirLogin = () => document.getElementById("loginBox").classList.remove("hidden");
 window.cerrarLogin = () => document.getElementById("loginBox").classList.add("hidden");
 window.cerrarAdmin = () => document.getElementById("adminPanel").classList.add("hidden");
+
+window.login = async function() {
+  const email = document.getElementById("user").value.trim();
+  const pass = document.getElementById("pass").value.trim();
+  const { error } = await client.auth.signInWithPassword({ email, password: pass });
+  if (error) alert("❌ Datos incorrectos");
+  else {
+    window.cerrarLogin();
+    document.getElementById("adminPanel").classList.remove("hidden");
+    mostrarToast("✅ Bienvenido Admin");
+  }
+};
 
 // --- CARRITO ---
 window.toggleCart = () => document.getElementById("cartPanel").classList.toggle("translate-x-full");
@@ -68,7 +82,7 @@ function renderCarrito() {
     <div class="flex items-center justify-between bg-zinc-800 p-3 rounded-xl mb-2">
       <div class="flex items-center gap-3">
         <img src="${p.imgs}" class="w-12 h-12 object-cover rounded-lg">
-        <div><p class="text-sm font-bold">${p.nombre}</p><p class="text-xs text-orange-500">$${p.precio}</p></div>
+        <div><p class="text-sm font-bold">${p.nombre}</p><p class="text-xs text-orange-500">$${Number(p.precio).toLocaleString()}</p></div>
       </div>
       <button onclick="eliminarDelCarrito(${i})" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
     </div>
@@ -81,23 +95,12 @@ window.eliminarDelCarrito = (i) => {
 };
 
 window.comprarPorWhatsApp = () => {
-  if (carrito.length === 0) return alert("Carrito vacío");
-  let texto = "Hola TechStore, quiero comprar: %0A" + carrito.map(p => `- ${p.nombre}`).join("%0A");
-  window.open(`https://wa.me/573000000000?text=${texto}`, "_blank");
+  if (carrito.length === 0) return alert("Tu carrito está vacío");
+  let msg = "¡Hola! Me interesan estos productos:%0A" + carrito.map(p => `- ${p.nombre} ($${p.precio})`).join("%0A");
+  window.open(`https://wa.me/573000000000?text=${msg}`, "_blank");
 };
 
-// --- ADMIN Y STORAGE ---
-window.login = async function() {
-  const email = document.getElementById("user").value;
-  const pass = document.getElementById("pass").value;
-  const { error } = await client.auth.signInWithPassword({ email, password: pass });
-  if (error) alert("Acceso denegado");
-  else {
-    window.cerrarLogin();
-    document.getElementById("adminPanel").classList.remove("hidden");
-  }
-};
-
+// --- GESTIÓN DE PRODUCTOS (ADMIN) ---
 window.guardarProducto = async function() {
   const fileInput = document.getElementById("pArchivo");
   const file = fileInput.files[0];
@@ -105,12 +108,13 @@ window.guardarProducto = async function() {
   const precio = document.getElementById("pPrecio").value;
   const descripcion = document.getElementById("pDesc").value;
 
-  if (!file || !nombre || !precio) return alert("⚠️ Llena todos los campos");
+  if (!file || !nombre || !precio) return alert("⚠️ Completa los datos y selecciona una imagen");
 
-  const nombreArchivo = `${Date.now()}_${file.name}`;
-  // IMPORTANTE: Asegúrate de que el bucket se llame EXACTAMENTE igual en Supabase
+  const nombreArchivo = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+
+  // Usamos 'IMAGENES_PRODUCTOS' en mayúsculas
   const { data, error: uploadError } = await client.storage
-    .from('IMAGENES_PRODUCTOS') 
+    .from('IMAGENES_PRODUCTOS')
     .upload(nombreArchivo, file);
 
   if (uploadError) return alert("❌ Error Bucket: " + uploadError.message);
@@ -118,12 +122,15 @@ window.guardarProducto = async function() {
   const { data: urlData } = client.storage.from('IMAGENES_PRODUCTOS').getPublicUrl(nombreArchivo);
   
   const { error: dbError } = await client.from('productos').insert([{
-    nombre, precio: parseFloat(precio), descripcion, imgs: urlData.publicUrl
+    nombre, 
+    precio: parseFloat(precio), 
+    descripcion, 
+    imgs: urlData.publicUrl
   }]);
 
   if (dbError) alert("Error DB: " + dbError.message);
   else {
-    alert("✅ Producto subido");
+    alert("✅ Producto publicado con éxito");
     window.cerrarAdmin();
     cargarProductos();
   }
@@ -131,6 +138,7 @@ window.guardarProducto = async function() {
 
 function mostrarToast(msg) {
   const t = document.getElementById("toast");
+  if (!t) return;
   t.innerText = msg;
   t.classList.remove("translate-y-20", "opacity-0");
   setTimeout(() => t.classList.add("translate-y-20", "opacity-0"), 3000);
@@ -139,7 +147,7 @@ function mostrarToast(msg) {
 window.onload = () => {
   cargarProductos();
   actualizarCarrito();
-  document.getElementById("searchInput").addEventListener("input", (e) => {
+  document.getElementById("searchInput")?.addEventListener("input", (e) => {
     searchTerm = e.target.value;
     renderCatalogo();
   });
