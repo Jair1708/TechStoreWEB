@@ -1,10 +1,10 @@
-// ====================== CONFIGURACIÓN SUPABASE ======================
-const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";     // ← CAMBIA ESTO
-const SUPABASE_ANON_KEY = "eyJhbGciOi...";                  // ← CAMBIA ESTO (tu anon key)
+// ====================== CONFIGURACIÓN SUPABASE (TU PROYECTO) ======================
+const SUPABASE_URL = "https://dlzerjvbqixllkkralfz.supabase.co";
+const SUPABASE_ANON_KEY = "PEGA_AQUÍ_TU_ANON_KEY";   // ← CAMBIA ESTO (ver paso 3)
 
 const { createClient } = Supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// ==================================================================
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// =================================================================================
 
 let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
@@ -12,7 +12,7 @@ let searchTerm = "";
 
 // ====================== CARGAR PRODUCTOS ======================
 async function cargarProductos() {
-  const { data, error } = await supabase.from('productos').select('*');
+  const { data, error } = await db.from('productos').select('*');
   if (error) return console.error("Error cargando productos:", error);
   productos = data || [];
   renderCatalogo();
@@ -33,7 +33,7 @@ window.login = async function() {
   const email = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value.trim();
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  const { error } = await db.auth.signInWithPassword({ email, password: pass });
   if (error) {
     alert("❌ Email o contraseña incorrectos");
   } else {
@@ -218,10 +218,10 @@ async function agregarProductoAdmin() {
   const imgs = [];
   for (let file of files) {
     const fileName = `${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage.from('productos').upload(fileName, file);
+    const { error: uploadError } = await db.storage.from('productos').upload(fileName, file);
     if (uploadError) return alert("Error al subir imagen");
 
-    const { data: urlData } = supabase.storage.from('productos').getPublicUrl(fileName);
+    const { data: urlData } = db.storage.from('productos').getPublicUrl(fileName);
     imgs.push(urlData.publicUrl);
   }
 
@@ -233,7 +233,7 @@ async function agregarProductoAdmin() {
     imgs: imgs
   };
 
-  const { error } = await supabase.from('productos').insert(nuevo);
+  const { error } = await db.from('productos').insert(nuevo);
   if (error) alert(error.message);
   else {
     mostrarToast("✅ Producto agregado");
@@ -244,7 +244,7 @@ async function agregarProductoAdmin() {
 
 window.eliminarProducto = async function(id) {
   if (confirm("¿Eliminar este producto?")) {
-    const { error } = await supabase.from('productos').delete().eq('id', id);
+    const { error } = await db.from('productos').delete().eq('id', id);
     if (!error) {
       cargarProductos();
       renderAdmin();
