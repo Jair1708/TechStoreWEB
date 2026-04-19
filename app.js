@@ -194,8 +194,16 @@ window.eliminarProducto = async (id) => {
 
 // ==================== CARRITO ====================
 window.toggleCart = () => {
+  console.log("✅ toggleCart fue llamado"); // ← esto nos ayuda a debuggear
+  
   const panel = document.getElementById("cartPanel");
+  if (!panel) {
+    console.error("❌ No se encontró #cartPanel en el DOM");
+    return;
+  }
+
   panel.classList.toggle("translate-x-full");
+
   if (!panel.classList.contains("translate-x-full")) {
     panel.style.boxShadow = "-10px 0 30px -10px rgb(249 115 22 / 0.3)";
   } else {
