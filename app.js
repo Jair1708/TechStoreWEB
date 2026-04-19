@@ -1,4 +1,4 @@
-// ====================== TECHSTORE - VERSIÓN DEFINITIVA ======================
+// ====================== TECHSTORE - VERSIÓN CORREGIDA ======================
 const SUPABASE_URL = "https://dlzerjvbqixllkkralfz.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsemVyanZicWl4bGxra3JhbGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDIyNzksImV4cCI6MjA5MjAxODI3OX0.5mtSxbh_0LOfdQ-b1LlskylovoZa1zeyn1gFx5owQYM";
 
@@ -8,10 +8,24 @@ let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 let searchTerm = "";
 
-// Cargar productos
+// Cargar productos con mejor manejo de errores
 async function cargarProductos() {
-  const { data, error } = await client.from('productos').select('*');
-  if (error) return console.error("Error cargando productos:", error);
+  const loading = document.getElementById("catalogoGrid");
+  loading.innerHTML = `<div class="col-span-full text-center py-12"><i class="fa-solid fa-spinner fa-spin text-4xl text-orange-500"></i><p class="mt-4 text-zinc-400">Cargando productos...</p></div>`;
+
+  const { data, error } = await client.from('productos').select('*').order('id', { ascending: false });
+
+  if (error) {
+    console.error("Error cargando productos:", error);
+    document.getElementById("catalogoGrid").innerHTML = `
+      <div class="col-span-full text-center py-12 text-red-400">
+        <i class="fa-solid fa-triangle-exclamation text-5xl"></i>
+        <p class="mt-4">No se pudieron cargar los productos.<br>
+        <small>Revisa las políticas RLS en Supabase</small></p>
+      </div>`;
+    return;
+  }
+
   productos = data || [];
   renderCatalogo();
 }
@@ -19,24 +33,29 @@ async function cargarProductos() {
 function renderCatalogo() {
   const grid = document.getElementById("catalogoGrid");
   const empty = document.getElementById("emptyState");
-  const filtrados = productos.filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filtrados = productos.filter(p => 
+    p.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (filtrados.length === 0) {
     empty.classList.remove("hidden");
     grid.innerHTML = "";
     return;
   }
+
   empty.classList.add("hidden");
 
   grid.innerHTML = filtrados.map(p => `
     <div class="product-card group bg-zinc-900 border border-zinc-800 hover:border-orange-500 rounded-3xl overflow-hidden transition-all duration-300 hover:-translate-y-2">
       <div class="relative">
-        <img src="${p.imgs}" class="w-full h-64 object-cover" onerror="this.src='https://via.placeholder.com/400x300?text=Sin+imagen'">
+        <img src="${p.imgs || 'https://via.placeholder.com/400x300?text=Sin+imagen'}" 
+             class="w-full h-64 object-cover" 
+             onerror="this.src='https://via.placeholder.com/400x300?text=Sin+imagen'">
         <div class="absolute top-4 right-4 bg-black/80 text-white text-xs px-3 py-1 rounded-2xl font-bold">$${Number(p.precio).toLocaleString()}</div>
       </div>
       <div class="p-6">
         <h3 class="font-bold text-xl mb-1">${p.nombre}</h3>
-        <p class="text-zinc-400 text-sm mb-6">${p.descripcion || "Sin descripción"}</p>
+        <p class="text-zinc-400 text-sm mb-6 line-clamp-3">${p.descripcion || "Sin descripción"}</p>
         <button onclick="agregarAlCarrito(${p.id})" class="w-full bg-white text-black py-4 rounded-2xl font-bold group-hover:bg-orange-500 group-hover:text-white transition-all">
           Agregar al carrito
         </button>
@@ -45,8 +64,7 @@ function renderCatalogo() {
   `).join('');
 }
 
-// Resto del código (navegación, login, carrito, toast, etc.) se mantiene igual que la versión anterior que te di.
-
+// ==================== EL RESTO DEL CÓDIGO (no cambiar) ====================
 window.mostrarSeccion = (id) => {
   document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
   const section = document.getElementById(id);
@@ -99,10 +117,7 @@ window.guardarProducto = async function() {
     .from('imagenes_productos')
     .upload(nombreArchivo, file);
 
-  if (uploadError) {
-    console.error(uploadError);
-    return alert("❌ Error al subir imagen:\n" + uploadError.message + "\n\nRevisa las políticas del bucket.");
-  }
+  if (uploadError) return alert("❌ Error al subir imagen: " + uploadError.message);
 
   const { data: urlData } = client.storage.from('imagenes_productos').getPublicUrl(nombreArchivo);
 
@@ -110,10 +125,10 @@ window.guardarProducto = async function() {
     nombre,
     precio: parseFloat(precio),
     descripcion,
-    imgs: urlData.publicUrl   // ← ahora coincide con la columna TEXT
+    imgs: urlData.publicUrl
   }]);
 
-  if (dbError) return alert("❌ Error al guardar en BD: " + dbError.message);
+  if (dbError) return alert("❌ Error al guardar: " + dbError.message);
 
   alert("✅ ¡Producto publicado con éxito!");
   cerrarAdmin();
@@ -121,10 +136,9 @@ window.guardarProducto = async function() {
   document.getElementById("pPrecio").value = "";
   document.getElementById("pDesc").value = "";
   document.getElementById("pArchivo").value = "";
-  cargarProductos();
+  cargarProductos();   // ← recarga el catálogo automáticamente
 };
 
-// (El resto del código de carrito, toast y onload es igual que antes)
 window.toggleCart = () => document.getElementById("cartPanel").classList.toggle("translate-x-full");
 
 window.agregarAlCarrito = (id) => {
@@ -168,7 +182,7 @@ window.comprarPorWhatsApp = () => {
   let msg = "¡Hola! Quiero comprar:%0A%0A" + 
             carrito.map(p => `- ${p.nombre} → $${Number(p.precio).toLocaleString()}`).join("%0A") +
             "%0A%0ATotal: $" + carrito.reduce((sum, p) => sum + Number(p.precio), 0).toLocaleString();
-  window.open(`https://wa.me/573000000000?text=${msg}`, "_blank");
+  window.open(`https://wa.me/573248777231?text=${msg}`, "_blank");  // ← tu número real
 };
 
 function mostrarToast(msg) {
