@@ -10,7 +10,7 @@
 </head>
 <body class="bg-zinc-950 text-white font-sans">
 
-  <!-- HEADER CON TU LOGO REAL -->
+  <!-- HEADER -->
   <header class="bg-black/90 backdrop-blur-lg sticky top-0 z-50 border-b border-zinc-800">
     <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
       <div onclick="mostrarSeccion('inicio')" class="flex items-center gap-3 cursor-pointer">
@@ -24,47 +24,29 @@
       </nav>
 
       <div class="flex items-center gap-4">
-        <button onclick="abrirLogin()" class="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 px-6 py-3 rounded-3xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-orange-500/30">
-          <i class="fa-solid fa-shield-halved"></i>
-          <span>Admin</span>
+        <button onclick="abrirLogin()" class="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3 rounded-3xl font-bold text-sm transition-all active:scale-95">
+          <i class="fa-solid fa-shield-halved"></i> Admin
         </button>
-
         <button onclick="toggleCart()" class="relative bg-zinc-900 hover:bg-zinc-800 p-4 rounded-3xl transition-all active:scale-95">
           <i class="fa-solid fa-cart-shopping text-2xl"></i>
-          <span id="cartCount" class="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-bold w-6 h-6 flex items-center justify-center rounded-2xl shadow-inner">0</span>
-        </button>
-
-        <button onclick="toggleMobileMenu()" class="md:hidden text-3xl">
-          <i class="fa-solid fa-bars"></i>
+          <span id="cartCount" class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-2xl">0</span>
         </button>
       </div>
     </div>
-
-    <!-- Menú móvil -->
-    <div id="mobileMenu" class="hidden md:hidden bg-black border-t border-zinc-800 px-6 py-4">
-      <button onclick="mostrarSeccion('inicio');toggleMobileMenu()" class="block w-full text-left py-3 text-lg">🏠 Inicio</button>
-      <button onclick="mostrarSeccion('catalogo');toggleMobileMenu()" class="block w-full text-left py-3 text-lg">📦 Catálogo</button>
-    </div>
   </header>
 
-  <!-- BANNER HERO CON TU IMAGEN REAL -->
+  <!-- BANNER HERO -->
   <section id="inicio" class="relative min-h-screen flex items-center overflow-hidden">
     <img src="https://dlzerjvbqixllkkralfz.supabase.co/storage/v1/object/public/imagenes_productos/banner-hero.jpg" 
-         class="absolute inset-0 w-full h-full object-cover" 
-         alt="TechStore Banner">
-
-    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
+         class="absolute inset-0 w-full h-full object-cover" alt="Banner">
+    <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent"></div>
     
-    <div class="max-w-7xl mx-auto px-6 relative z-10 pt-20">
+    <div class="max-w-7xl mx-auto px-6 relative z-10">
       <div class="max-w-lg">
-        <h1 class="text-6xl md:text-7xl font-black tracking-tighter leading-none text-white drop-shadow-lg">
-          TECHSTORE 🔥
-        </h1>
-        <p class="text-3xl text-orange-300 mt-4 drop-shadow-lg">Gadgets Premium • Pago Contra Entrega en Colombia</p>
-        <button onclick="mostrarSeccion('catalogo')" 
-                class="mt-10 bg-white text-black font-bold text-2xl px-12 py-6 rounded-3xl flex items-center gap-4 hover:scale-105 transition-all shadow-xl">
-          VER CATÁLOGO COMPLETO 
-          <i class="fa-solid fa-arrow-right"></i>
+        <h1 class="text-6xl font-black tracking-tighter">TECHSTORE 🔥</h1>
+        <p class="text-3xl text-orange-300 mt-4">Gadgets Premium • Pago Contra Entrega</p>
+        <button onclick="mostrarSeccion('catalogo')" class="mt-10 bg-white text-black font-bold text-2xl px-12 py-6 rounded-3xl hover:scale-105 transition-all">
+          VER CATÁLOGO
         </button>
       </div>
     </div>
@@ -72,25 +54,51 @@
 
   <!-- CATÁLOGO -->
   <section id="catalogo" class="max-w-7xl mx-auto px-6 py-16 hidden">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
-      <h2 class="text-5xl font-black tracking-tighter">Catálogo</h2>
-      <div class="relative mt-6 md:mt-0">
-        <input id="searchInput" type="text" placeholder="Buscar productos..." 
-               class="w-full md:w-80 bg-zinc-900 border border-zinc-700 focus:border-orange-400 rounded-3xl px-8 py-5 text-lg outline-none transition-all">
-        <i class="fa-solid fa-magnifying-glass absolute right-8 top-1/2 -translate-y-1/2 text-zinc-400"></i>
-      </div>
-    </div>
-
-    <div id="catalogoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
-    
-    <div id="emptyState" class="hidden text-center py-20">
-      <i class="fa-solid fa-box-open text-7xl text-zinc-700 mb-4"></i>
-      <p class="text-xl text-zinc-400">No encontramos productos 😔</p>
-    </div>
+    <h2 class="text-5xl font-black mb-10">Catálogo</h2>
+    <div id="catalogoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
   </section>
 
-  <!-- Resto de tu página (login, admin, carrito, toast) -->
-  <!-- Copia y pega aquí el resto de tu código anterior (loginBox, adminPanel, cartPanel, toast) -->
+  <!-- MODAL PRODUCTO -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100]">
+    <div id="modalContent" class="bg-zinc-900 w-full max-w-lg mx-4 rounded-3xl overflow-hidden"></div>
+  </div>
+
+  <!-- LOGIN ADMIN -->
+  <div id="loginBox" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[200]">
+    <div class="bg-zinc-900 p-8 rounded-3xl w-full max-w-sm">
+      <h2 class="text-3xl font-bold mb-6">Acceso Admin</h2>
+      <input id="user" type="email" placeholder="Email" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
+      <input id="pass" type="password" placeholder="Contraseña" class="w-full mb-6 px-6 py-4 bg-black rounded-2xl">
+      <button onclick="login()" class="w-full bg-orange-500 py-4 rounded-3xl font-bold">Entrar</button>
+    </div>
+  </div>
+
+  <!-- PANEL ADMIN -->
+  <div id="adminPanel" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[210] p-4">
+    <div class="bg-zinc-900 w-full max-w-2xl rounded-3xl p-8">
+      <h2 class="text-3xl font-bold mb-6">Nuevo Producto</h2>
+      <input id="pNombre" placeholder="Nombre del producto" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
+      <input id="pPrecio" type="number" placeholder="Precio" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
+      <textarea id="pDesc" placeholder="Descripción" rows="4" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl"></textarea>
+      <input id="pArchivo" type="file" accept="image/*" class="w-full mb-6">
+      <button onclick="guardarProducto()" class="w-full bg-orange-500 py-4 rounded-3xl font-bold">Publicar Producto</button>
+    </div>
+  </div>
+
+  <!-- CARRITO -->
+  <div id="cartPanel" class="fixed top-0 right-0 h-full w-96 bg-zinc-900 border-l border-zinc-700 z-[300] translate-x-full transition-transform">
+    <div class="p-6">
+      <h2 class="text-3xl font-bold mb-6">Tu Carrito</h2>
+      <div id="cartItems" class="space-y-6"></div>
+      <div class="mt-8 border-t pt-6">
+        <div class="flex justify-between text-xl"><span>Total</span><span id="cartTotal" class="font-bold text-orange-400">$0</span></div>
+        <button onclick="comprarPorWhatsApp()" class="w-full mt-6 bg-green-500 py-5 rounded-3xl font-bold text-xl">Enviar por WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="hidden fixed bottom-8 left-1/2 -translate-x-1/2 bg-orange-500 text-black px-8 py-4 rounded-3xl font-bold"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
