@@ -80,7 +80,7 @@ window.login = () => {
   if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("adminPanel").classList.remove("hidden");
-    renderAdminProductos();           // carga la lista de productos
+    renderAdminProductos();
   } else {
     alert("❌ Credenciales incorrectas");
   }
