@@ -6,16 +6,34 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
+// ==================== CREDENCIALES ADMIN ====================
+const ADMIN_EMAIL = "admin@techstore.com";
+const ADMIN_PASS = "admin123";
+
 // ==================== CARGAR PRODUCTOS ====================
 async function cargarProductos() {
   const { data, error } = await client.from('productos').select('*');
-  if (error) return console.error(error);
+  if (error) {
+    console.error(error);
+    alert("❌ Error al cargar productos: " + error.message);
+    return;
+  }
   productos = data || [];
   renderCatalogo();
 }
 
 function renderCatalogo() {
   const grid = document.getElementById("catalogoGrid");
+  
+  if (productos.length === 0) {
+    grid.innerHTML = `
+      <div class="col-span-full text-center py-20">
+        <p class="text-3xl text-zinc-400 mb-4">No hay productos en el catálogo todavía</p>
+        <button onclick="abrirLogin()" class="bg-orange-500 px-8 py-4 rounded-3xl font-bold">Agregar el primero como Admin</button>
+      </div>`;
+    return;
+  }
+
   grid.innerHTML = productos.map(p => `
     <div onclick="verProducto(${p.id})" class="cursor-pointer bg-zinc-900 rounded-3xl overflow-hidden hover:scale-105 transition-all">
       <img src="${p.imgs}" class="w-full h-56 object-cover">
@@ -50,10 +68,26 @@ window.verProducto = function(id) {
 
 // ==================== ADMIN ====================
 window.abrirLogin = () => document.getElementById("loginBox").classList.remove("hidden");
-window.login = async () => {
-  // Por ahora usamos login simple (puedes mejorar después)
-  document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("adminPanel").classList.remove("hidden");
+
+window.login = () => {
+  const email = document.getElementById("user").value.trim();
+  const pass = document.getElementById("pass").value;
+
+  if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("adminPanel").classList.remove("hidden");
+  } else {
+    alert("❌ Credenciales incorrectas\n\nDemo:\nadmin@techstore.com\nadmin123");
+  }
+};
+
+window.cerrarAdminPanel = () => {
+  document.getElementById("adminPanel").classList.add("hidden");
+  // Limpiar formulario
+  document.getElementById("pNombre").value = "";
+  document.getElementById("pPrecio").value = "";
+  document.getElementById("pDesc").value = "";
+  document.getElementById("pArchivo").value = "";
 };
 
 window.guardarProducto = async () => {
@@ -62,22 +96,41 @@ window.guardarProducto = async () => {
   const precio = document.getElementById("pPrecio").value;
   const descripcion = document.getElementById("pDesc").value.trim();
 
-  if (!file || !nombre || !precio) return alert("Faltan datos");
+  if (!file || !nombre || !precio) return alert("❌ Faltan datos");
 
   const fileName = Date.now() + "_" + file.name;
-  await client.storage.from('imagenes_productos').upload(fileName, file);
 
-  const { data: urlData } = client.storage.from('imagenes_productos').getPublicUrl(fileName);
+  // Subir imagen
+  const { error: uploadError } = await client.storage
+    .from('imagenes_productos')
+    .upload(fileName, file);
 
-  await client.from('productos').insert([{
-    nombre,
-    precio: parseFloat(precio),
-    descripcion,
-    imgs: urlData.publicUrl
-  }]);
+  if (uploadError) {
+    alert("❌ Error al subir imagen: " + uploadError.message);
+    return;
+  }
 
-  alert("✅ Producto guardado");
-  document.getElementById("adminPanel").classList.add("hidden");
+  const { data: urlData } = client.storage
+    .from('imagenes_productos')
+    .getPublicUrl(fileName);
+
+  // Guardar en base de datos
+  const { error: insertError } = await client
+    .from('productos')
+    .insert([{
+      nombre,
+      precio: parseFloat(precio),
+      descripcion,
+      imgs: urlData.publicUrl
+    }]);
+
+  if (insertError) {
+    alert("❌ Error al guardar producto: " + insertError.message);
+    return;
+  }
+
+  alert("✅ Producto publicado con éxito");
+  cerrarAdminPanel();
   cargarProductos();
 };
 
@@ -102,6 +155,17 @@ function actualizarCarrito() {
 function renderCarrito() {
   const container = document.getElementById("cartItems");
   let total = 0;
+
+  if (carrito.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-12 text-zinc-400">
+        <p class="text-xl">Tu carrito está vacío</p>
+        <p class="text-sm mt-2">Agrega algunos gadgets premium 🔥</p>
+      </div>`;
+    document.getElementById("cartTotal").textContent = "$0";
+    return;
+  }
+
   container.innerHTML = carrito.map((p, i) => {
     total += Number(p.precio);
     return `
@@ -111,9 +175,10 @@ function renderCarrito() {
           <h4 class="font-bold">${p.nombre}</h4>
           <p class="text-orange-400">$${Number(p.precio).toLocaleString()}</p>
         </div>
-        <button onclick="eliminarDelCarrito(${i})" class="text-red-500">Eliminar</button>
+        <button onclick="eliminarDelCarrito(${i})" class="text-red-500 hover:text-red-400">Eliminar</button>
       </div>`;
   }).join('');
+
   document.getElementById("cartTotal").textContent = "$" + total.toLocaleString();
 }
 
@@ -125,28 +190,8 @@ window.eliminarDelCarrito = (i) => {
 
 window.comprarPorWhatsApp = () => {
   if (carrito.length === 0) return alert("Carrito vacío");
-  let msg = "Pedido TechStore:%0A%0A" + carrito.map(p => `- ${p.nombre} - $${Number(p.precio).toLocaleString()}`).join("%0A");
-  window.open(`https://wa.me/573248777231?text=${msg}`, "_blank");
-  carrito = [];
-  localStorage.setItem("carrito", JSON.stringify(carrito));
-  actualizarCarrito();
-  toggleCart();
-};
 
-function mostrarToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.remove("hidden");
-  setTimeout(() => t.classList.add("hidden"), 2500);
-}
-
-// ==================== INICIO ====================
-window.mostrarSeccion = (id) => {
-  document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-};
-
-window.onload = () => {
-  cargarProductos();
-  actualizarCarrito();
-};
+  let total = carrito.reduce((acc, p) => acc + Number(p.precio), 0);
+  let msg = `🛒 *Pedido TechStore*%0A%0A`;
+  msg += carrito.map(p => `• ${p.nombre} - $${Number(p.precio).toLocaleString()}`).join("%0A");
+  msg += `%0A%0A
