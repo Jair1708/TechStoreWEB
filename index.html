@@ -60,12 +60,12 @@
 
   <!-- MODAL PRODUCTO -->
   <div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100]">
-  <div id="modalContent" 
-     class="bg-zinc-900 w-full max-w-lg mx-4 rounded-3xl max-h-[90vh] overflow-y-auto">
-</div>
+    <div id="modalContent" 
+         class="bg-zinc-900 w-full max-w-lg mx-4 rounded-3xl max-h-[90vh] overflow-y-auto relative">
+    </div>
+  </div>
 
   <!-- LOGIN ADMIN -->
-    <!-- LOGIN ADMIN -->
   <div id="loginBox" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[200]">
     <div class="bg-zinc-900 p-8 rounded-3xl w-full max-w-sm">
       <div class="flex justify-end mb-4">
@@ -78,10 +78,9 @@
     </div>
   </div>
 
-   <!-- PANEL ADMIN -->
+  <!-- PANEL ADMIN -->
   <div id="adminPanel" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[210] p-4 overflow-auto">
     <div class="bg-zinc-900 w-full max-w-4xl rounded-3xl p-8">
-      
       <div class="flex justify-between items-center mb-8">
         <h2 class="text-3xl font-bold">Gestión de Productos</h2>
         <button onclick="cerrarAdminPanel()" class="text-5xl leading-none text-zinc-400 hover:text-white">×</button>
@@ -104,21 +103,15 @@
       <!-- LISTA DE PRODUCTOS EXISTENTES -->
       <h3 class="text-xl font-bold mb-4">Productos publicados</h3>
       <div id="adminProductosList" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2"></div>
-
     </div>
   </div>
 
-    <!-- CARRITO -->
+  <!-- CARRITO -->
   <div id="cartPanel" class="fixed top-0 right-0 h-full w-96 bg-zinc-900 border-l border-zinc-700 z-[300] translate-x-full transition-transform duration-300">
     <div class="p-6">
-      
-      <!-- NUEVO HEADER DEL CARRITO CON BOTÓN CERRAR -->
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-3xl font-bold">Tu Carrito</h2>
-        <button onclick="toggleCart()" 
-                class="text-5xl leading-none text-zinc-400 hover:text-orange-400 transition-colors">
-          ×
-        </button>
+        <button onclick="toggleCart()" class="text-5xl leading-none text-zinc-400 hover:text-orange-400 transition-colors">×</button>
       </div>
 
       <div id="cartItems" class="space-y-6"></div>
