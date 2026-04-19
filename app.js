@@ -204,4 +204,14 @@ window.comprarPorWhatsApp = () => {
   let total = carrito.reduce((acc, p) => acc + Number(p.precio), 0);
   let msg = `🛒 *Pedido TechStore*%0A%0A`;
   msg += carrito.map(p => `• ${p.nombre} - $${Number(p.precio).toLocaleString()}`).join("%0A");
-  msg += `%0A%0A
+  msg += `%0A%0A*Total: $${total.toLocaleString()}*`;
+
+  // ←←← NÚMERO ACTUALIZADO AQUÍ
+  window.open(`https://wa.me/573505555883?text=${msg}`, "_blank");
+  
+  carrito = [];
+  localStorage.setItem("carrito", JSON.stringify(carrito));
+  actualizarCarrito();
+  toggleCart();
+  mostrarToast("✅ Pedido enviado por WhatsApp");
+};
