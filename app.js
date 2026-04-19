@@ -135,7 +135,17 @@ window.guardarProducto = async () => {
 };
 
 // ==================== CARRITO ====================
-window.toggleCart = () => document.getElementById("cartPanel").classList.toggle("translate-x-full");
+window.toggleCart = () => {
+  const panel = document.getElementById("cartPanel");
+  panel.classList.toggle("translate-x-full");
+  
+  // Pequeño efecto extra de suavidad
+  if (!panel.classList.contains("translate-x-full")) {
+    panel.style.boxShadow = "-10px 0 30px -10px rgb(249 115 22 / 0.3)";
+  } else {
+    panel.style.boxShadow = "";
+  }
+};
 
 window.agregarAlCarrito = (id) => {
   const p = productos.find(prod => prod.id === id);
