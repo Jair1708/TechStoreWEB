@@ -67,8 +67,9 @@ window.verProducto = function(id) {
 };
 
 // ==================== ADMIN ====================
-// ==================== ADMIN ====================
-let editingId = null;   // ← importante: guarda si estamos editando
+const ADMIN_EMAIL = "jairandresospina12@gmail.com";
+const ADMIN_PASS = "1070601857";
+let editingId = null;
 
 window.abrirLogin = () => document.getElementById("loginBox").classList.remove("hidden");
 
@@ -79,9 +80,9 @@ window.login = () => {
   if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("adminPanel").classList.remove("hidden");
-    renderAdminProductos();           // ← carga la lista
+    renderAdminProductos();           // carga la lista de productos
   } else {
-    alert("❌ Credenciales incorrectas\n\nDemo:\nadmin@techstore.com\nadmin123");
+    alert("❌ Credenciales incorrectas");
   }
 };
 
