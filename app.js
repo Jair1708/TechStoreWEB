@@ -47,12 +47,16 @@ window.verProducto = function(id) {
   if (!p) return;
 
   document.getElementById("modalContent").innerHTML = `
-    <div class="p-6">
-      <button onclick="document.getElementById('modal').classList.add('hidden')" class="float-right text-4xl text-zinc-400">×</button>
+    <!-- BOTÓN CERRAR FIJO -->
+    <button onclick="document.getElementById('modal').classList.add('hidden')" 
+            class="absolute top-4 right-4 text-4xl text-zinc-400 hover:text-white z-10">×</button>
+
+    <div class="p-6 pt-12">   <!-- pt-12 para que no se solape con la X -->
       <img src="${p.imgs}" class="w-full rounded-2xl mb-6">
       <h2 class="text-3xl font-bold">${p.nombre}</h2>
       <p class="text-orange-400 text-4xl font-bold mt-2">$${Number(p.precio).toLocaleString()}</p>
-      <p class="mt-6 text-zinc-300">${p.descripcion || "Sin descripción"}</p>
+      <p class="mt-6 text-zinc-300 leading-relaxed">${p.descripcion || "Sin descripción"}</p>
+      
       <button onclick="agregarAlCarrito(${p.id}); document.getElementById('modal').classList.add('hidden')" 
               class="w-full mt-8 bg-orange-500 py-5 rounded-3xl font-bold text-xl">
         🛒 Agregar al carrito
