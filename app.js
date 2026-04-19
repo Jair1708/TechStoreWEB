@@ -6,10 +6,6 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let productos = [];
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
-// ==================== CREDENCIALES ADMIN ====================
-const ADMIN_EMAIL = "admin@techstore.com";
-const ADMIN_PASS = "admin123";
-
 // ==================== CARGAR PRODUCTOS ====================
 async function cargarProductos() {
   const { data, error } = await client.from('productos').select('*');
@@ -108,10 +104,8 @@ function renderAdminProductos() {
         <p class="text-sm text-zinc-400 line-clamp-2">${p.descripcion || "Sin descripción"}</p>
       </div>
       <div class="flex flex-col gap-2">
-        <button onclick="editarProducto(${p.id})" 
-                class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-2xl text-sm font-bold">Editar</button>
-        <button onclick="eliminarProducto(${p.id})" 
-                class="bg-red-600 hover:bg-red-500 px-5 py-2 rounded-2xl text-sm font-bold">Eliminar</button>
+        <button onclick="editarProducto(${p.id})" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-2xl text-sm font-bold">Editar</button>
+        <button onclick="eliminarProducto(${p.id})" class="bg-red-600 hover:bg-red-500 px-5 py-2 rounded-2xl text-sm font-bold">Eliminar</button>
       </div>
     </div>
   `).join('');
@@ -130,7 +124,6 @@ window.editarProducto = function(id) {
   document.getElementById("pPrecio").value = p.precio;
   document.getElementById("pDesc").value = p.descripcion || "";
 
-  // Scroll al formulario
   document.getElementById("adminPanel").scrollTop = 0;
 };
 
@@ -157,67 +150,38 @@ window.guardarProducto = async () => {
 
   if (file) {
     const fileName = Date.now() + "_" + file.name;
-    const { error: uploadError } = await client.storage
-      .from('imagenes_productos')
-      .upload(fileName, file);
-
+    const { error: uploadError } = await client.storage.from('imagenes_productos').upload(fileName, file);
     if (uploadError) return alert("❌ Error al subir imagen: " + uploadError.message);
 
-    const { data: urlData } = client.storage
-      .from('imagenes_productos')
-      .getPublicUrl(fileName);
+    const { data: urlData } = client.storage.from('imagenes_productos').getPublicUrl(fileName);
     imageUrl = urlData.publicUrl;
   }
 
   if (editingId) {
-    // === EDITAR ===
     const updateData = { nombre, precio: parseFloat(precio), descripcion };
     if (imageUrl) updateData.imgs = imageUrl;
 
-    const { error } = await client
-      .from('productos')
-      .update(updateData)
-      .eq('id', editingId);
-
+    const { error } = await client.from('productos').update(updateData).eq('id', editingId);
     if (error) return alert("❌ Error al actualizar: " + error.message);
-
     alert("✅ Producto actualizado");
   } else {
-    // === CREAR ===
     if (!file) return alert("❌ Debes subir una imagen para un producto nuevo");
-
-    const { error } = await client
-      .from('productos')
-      .insert([{
-        nombre,
-        precio: parseFloat(precio),
-        descripcion,
-        imgs: imageUrl
-      }]);
-
+    const { error } = await client.from('productos').insert([{ nombre, precio: parseFloat(precio), descripcion, imgs: imageUrl }]);
     if (error) return alert("❌ Error al guardar: " + error.message);
-
     alert("✅ Producto publicado");
   }
 
   cancelarEdicion();
-  await cargarProductos();        // actualiza la lista global
-  renderAdminProductos();         // actualiza la lista del admin
+  await cargarProductos();
+  renderAdminProductos();
 };
 
 // ==================== ELIMINAR PRODUCTO ====================
 window.eliminarProducto = async (id) => {
   if (!confirm("¿Seguro que quieres eliminar este producto?")) return;
 
-  const { error } = await client
-    .from('productos')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    alert("❌ Error al eliminar: " + error.message);
-    return;
-  }
+  const { error } = await client.from('productos').delete().eq('id', id);
+  if (error) return alert("❌ Error al eliminar: " + error.message);
 
   alert("✅ Producto eliminado");
   await cargarProductos();
@@ -228,8 +192,6 @@ window.eliminarProducto = async (id) => {
 window.toggleCart = () => {
   const panel = document.getElementById("cartPanel");
   panel.classList.toggle("translate-x-full");
-  
-  // Pequeño efecto extra de suavidad
   if (!panel.classList.contains("translate-x-full")) {
     panel.style.boxShadow = "-10px 0 30px -10px rgb(249 115 22 / 0.3)";
   } else {
@@ -296,7 +258,6 @@ window.comprarPorWhatsApp = () => {
   msg += carrito.map(p => `• ${p.nombre} - $${Number(p.precio).toLocaleString()}`).join("%0A");
   msg += `%0A%0A*Total: $${total.toLocaleString()}*`;
 
-  // ←←← NÚMERO ACTUALIZADO AQUÍ
   window.open(`https://wa.me/573505555883?text=${msg}`, "_blank");
   
   carrito = [];
@@ -304,4 +265,22 @@ window.comprarPorWhatsApp = () => {
   actualizarCarrito();
   toggleCart();
   mostrarToast("✅ Pedido enviado por WhatsApp");
+};
+
+function mostrarToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.remove("hidden");
+  setTimeout(() => t.classList.add("hidden"), 2800);
+}
+
+// ==================== INICIO ====================
+window.mostrarSeccion = (id) => {
+  document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+};
+
+window.onload = () => {
+  cargarProductos();
+  actualizarCarrito();
 };
