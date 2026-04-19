@@ -94,11 +94,21 @@
     </div>
   </div>
 
-  <!-- CARRITO -->
-  <div id="cartPanel" class="fixed top-0 right-0 h-full w-96 bg-zinc-900 border-l border-zinc-700 z-[300] translate-x-full transition-transform">
+    <!-- CARRITO -->
+  <div id="cartPanel" class="fixed top-0 right-0 h-full w-96 bg-zinc-900 border-l border-zinc-700 z-[300] translate-x-full transition-transform duration-300">
     <div class="p-6">
-      <h2 class="text-3xl font-bold mb-6">Tu Carrito</h2>
+      
+      <!-- NUEVO HEADER DEL CARRITO CON BOTÓN CERRAR -->
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold">Tu Carrito</h2>
+        <button onclick="toggleCart()" 
+                class="text-5xl leading-none text-zinc-400 hover:text-orange-400 transition-colors">
+          ×
+        </button>
+      </div>
+
       <div id="cartItems" class="space-y-6"></div>
+      
       <div class="mt-8 border-t pt-6">
         <div class="flex justify-between text-xl"><span>Total</span><span id="cartTotal" class="font-bold text-orange-400">$0</span></div>
         <button onclick="comprarPorWhatsApp()" class="w-full mt-6 bg-green-500 py-5 rounded-3xl font-bold text-xl">Enviar por WhatsApp</button>
