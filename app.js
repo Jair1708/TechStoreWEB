@@ -67,6 +67,9 @@ window.verProducto = function(id) {
 };
 
 // ==================== ADMIN ====================
+// ==================== ADMIN ====================
+let editingId = null;   // ← importante: guarda si estamos editando
+
 window.abrirLogin = () => document.getElementById("loginBox").classList.remove("hidden");
 
 window.login = () => {
@@ -76,6 +79,7 @@ window.login = () => {
   if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("adminPanel").classList.remove("hidden");
+    renderAdminProductos();           // ← carga la lista
   } else {
     alert("❌ Credenciales incorrectas\n\nDemo:\nadmin@techstore.com\nadmin123");
   }
@@ -83,55 +87,140 @@ window.login = () => {
 
 window.cerrarAdminPanel = () => {
   document.getElementById("adminPanel").classList.add("hidden");
-  // Limpiar formulario
+  cancelarEdicion();
+};
+
+function renderAdminProductos() {
+  const container = document.getElementById("adminProductosList");
+  
+  if (productos.length === 0) {
+    container.innerHTML = `<p class="text-zinc-400 text-center py-8">Aún no hay productos</p>`;
+    return;
+  }
+
+  container.innerHTML = productos.map(p => `
+    <div class="flex gap-4 bg-zinc-800 rounded-2xl p-4">
+      <img src="${p.imgs}" class="w-20 h-20 object-cover rounded-xl">
+      <div class="flex-1">
+        <h4 class="font-bold">${p.nombre}</h4>
+        <p class="text-orange-400 text-xl">$${Number(p.precio).toLocaleString()}</p>
+        <p class="text-sm text-zinc-400 line-clamp-2">${p.descripcion || "Sin descripción"}</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button onclick="editarProducto(${p.id})" 
+                class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-2xl text-sm font-bold">Editar</button>
+        <button onclick="eliminarProducto(${p.id})" 
+                class="bg-red-600 hover:bg-red-500 px-5 py-2 rounded-2xl text-sm font-bold">Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==================== EDITAR PRODUCTO ====================
+window.editarProducto = function(id) {
+  const p = productos.find(x => x.id === id);
+  if (!p) return;
+
+  editingId = id;
+  document.getElementById("formTitle").textContent = "Editar Producto";
+  document.getElementById("btnGuardar").textContent = "Guardar Cambios";
+  
+  document.getElementById("pNombre").value = p.nombre;
+  document.getElementById("pPrecio").value = p.precio;
+  document.getElementById("pDesc").value = p.descripcion || "";
+
+  // Scroll al formulario
+  document.getElementById("adminPanel").scrollTop = 0;
+};
+
+window.cancelarEdicion = () => {
+  editingId = null;
+  document.getElementById("formTitle").textContent = "Nuevo Producto";
+  document.getElementById("btnGuardar").textContent = "Publicar Producto";
   document.getElementById("pNombre").value = "";
   document.getElementById("pPrecio").value = "";
   document.getElementById("pDesc").value = "";
   document.getElementById("pArchivo").value = "";
 };
 
+// ==================== GUARDAR (Crear o Editar) ====================
 window.guardarProducto = async () => {
   const file = document.getElementById("pArchivo").files[0];
   const nombre = document.getElementById("pNombre").value.trim();
   const precio = document.getElementById("pPrecio").value;
   const descripcion = document.getElementById("pDesc").value.trim();
 
-  if (!file || !nombre || !precio) return alert("❌ Faltan datos");
+  if (!nombre || !precio) return alert("❌ Faltan datos");
 
-  const fileName = Date.now() + "_" + file.name;
+  let imageUrl = null;
 
-  // Subir imagen
-  const { error: uploadError } = await client.storage
-    .from('imagenes_productos')
-    .upload(fileName, file);
+  if (file) {
+    const fileName = Date.now() + "_" + file.name;
+    const { error: uploadError } = await client.storage
+      .from('imagenes_productos')
+      .upload(fileName, file);
 
-  if (uploadError) {
-    alert("❌ Error al subir imagen: " + uploadError.message);
-    return;
+    if (uploadError) return alert("❌ Error al subir imagen: " + uploadError.message);
+
+    const { data: urlData } = client.storage
+      .from('imagenes_productos')
+      .getPublicUrl(fileName);
+    imageUrl = urlData.publicUrl;
   }
 
-  const { data: urlData } = client.storage
-    .from('imagenes_productos')
-    .getPublicUrl(fileName);
+  if (editingId) {
+    // === EDITAR ===
+    const updateData = { nombre, precio: parseFloat(precio), descripcion };
+    if (imageUrl) updateData.imgs = imageUrl;
 
-  // Guardar en base de datos
-  const { error: insertError } = await client
+    const { error } = await client
+      .from('productos')
+      .update(updateData)
+      .eq('id', editingId);
+
+    if (error) return alert("❌ Error al actualizar: " + error.message);
+
+    alert("✅ Producto actualizado");
+  } else {
+    // === CREAR ===
+    if (!file) return alert("❌ Debes subir una imagen para un producto nuevo");
+
+    const { error } = await client
+      .from('productos')
+      .insert([{
+        nombre,
+        precio: parseFloat(precio),
+        descripcion,
+        imgs: imageUrl
+      }]);
+
+    if (error) return alert("❌ Error al guardar: " + error.message);
+
+    alert("✅ Producto publicado");
+  }
+
+  cancelarEdicion();
+  await cargarProductos();        // actualiza la lista global
+  renderAdminProductos();         // actualiza la lista del admin
+};
+
+// ==================== ELIMINAR PRODUCTO ====================
+window.eliminarProducto = async (id) => {
+  if (!confirm("¿Seguro que quieres eliminar este producto?")) return;
+
+  const { error } = await client
     .from('productos')
-    .insert([{
-      nombre,
-      precio: parseFloat(precio),
-      descripcion,
-      imgs: urlData.publicUrl
-    }]);
+    .delete()
+    .eq('id', id);
 
-  if (insertError) {
-    alert("❌ Error al guardar producto: " + insertError.message);
+  if (error) {
+    alert("❌ Error al eliminar: " + error.message);
     return;
   }
 
-  alert("✅ Producto publicado con éxito");
-  cerrarAdminPanel();
-  cargarProductos();
+  alert("✅ Producto eliminado");
+  await cargarProductos();
+  renderAdminProductos();
 };
 
 // ==================== CARRITO ====================

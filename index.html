@@ -77,20 +77,33 @@
     </div>
   </div>
 
-  <!-- PANEL ADMIN -->
-  <div id="adminPanel" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[210] p-4">
-    <div class="bg-zinc-900 w-full max-w-2xl rounded-3xl p-8">
+   <!-- PANEL ADMIN -->
+  <div id="adminPanel" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[210] p-4 overflow-auto">
+    <div class="bg-zinc-900 w-full max-w-4xl rounded-3xl p-8">
+      
       <div class="flex justify-between items-center mb-8">
-        <h2 class="text-3xl font-bold">Nuevo Producto</h2>
+        <h2 class="text-3xl font-bold">Gestión de Productos</h2>
         <button onclick="cerrarAdminPanel()" class="text-5xl leading-none text-zinc-400 hover:text-white">×</button>
       </div>
-      <input id="pNombre" placeholder="Nombre del producto" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
-      <input id="pPrecio" type="number" placeholder="Precio" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
-      <textarea id="pDesc" placeholder="Descripción" rows="4" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl"></textarea>
-      <input id="pArchivo" type="file" accept="image/*" class="w-full mb-6">
-      
-      <button onclick="guardarProducto()" class="w-full bg-orange-500 py-4 rounded-3xl font-bold">Publicar Producto</button>
-      <button onclick="cerrarAdminPanel()" class="w-full mt-3 bg-zinc-800 py-4 rounded-3xl font-bold">Cancelar</button>
+
+      <!-- FORMULARIO NUEVO / EDITAR -->
+      <div class="mb-12 border border-zinc-700 rounded-3xl p-6">
+        <h3 id="formTitle" class="text-2xl font-bold mb-6">Nuevo Producto</h3>
+        <input id="pNombre" placeholder="Nombre del producto" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
+        <input id="pPrecio" type="number" placeholder="Precio" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
+        <textarea id="pDesc" placeholder="Descripción" rows="3" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl"></textarea>
+        <input id="pArchivo" type="file" accept="image/*" class="w-full mb-6">
+        
+        <div class="flex gap-3">
+          <button onclick="guardarProducto()" id="btnGuardar" class="flex-1 bg-orange-500 py-4 rounded-3xl font-bold">Publicar Producto</button>
+          <button onclick="cancelarEdicion()" class="flex-1 bg-zinc-800 py-4 rounded-3xl font-bold">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- LISTA DE PRODUCTOS EXISTENTES -->
+      <h3 class="text-xl font-bold mb-4">Productos publicados</h3>
+      <div id="adminProductosList" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2"></div>
+
     </div>
   </div>
 
