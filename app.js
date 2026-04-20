@@ -281,6 +281,14 @@ function mostrarToast(msg) {
   setTimeout(() => t.classList.add("hidden"), 2800);
 }
 
+// ==================== MENÚ MÓVIL PROFESIONAL ====================
+window.toggleMobileMenu = () => {
+  const menu = document.getElementById("mobileMenu");
+  if (menu) {
+    menu.classList.toggle("hidden");
+  }
+};
+
 // ==================== INICIO ====================
 window.mostrarSeccion = (id) => {
   document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));

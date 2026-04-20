@@ -10,26 +10,66 @@
 </head>
 <body class="bg-zinc-950 text-white font-sans">
 
-  <!-- HEADER -->
-  <header class="bg-black/90 backdrop-blur-lg sticky top-0 z-50 border-b border-zinc-800">
+  <!-- HEADER PROFESIONAL -->
+  <header class="bg-black/95 backdrop-blur-xl sticky top-0 z-50 border-b border-zinc-800">
     <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-      <div onclick="mostrarSeccion('inicio')" class="flex items-center gap-3 cursor-pointer">
+      
+      <!-- Logo + Nombre -->
+      <div onclick="mostrarSeccion('inicio'); toggleMobileMenu()" 
+           class="flex items-center gap-3 cursor-pointer">
         <img src="https://dlzerjvbqixllkkralfz.supabase.co/storage/v1/object/public/imagenes_productos/logo-techstore.png" 
-             alt="TechStore" class="h-12 w-auto">
+             alt="TechStore" class="h-10 w-auto">
+        <span class="text-3xl font-black tracking-[-2px] text-white">TECHSTORE</span>
       </div>
 
-      <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
-        <button onclick="mostrarSeccion('inicio')" class="hover:text-orange-400 transition-colors">Inicio</button>
-        <button onclick="mostrarSeccion('catalogo')" class="hover:text-orange-400 transition-colors">Catálogo</button>
+      <!-- Navegación Desktop -->
+      <nav class="hidden md:flex items-center gap-10 text-sm font-semibold uppercase tracking-widest">
+        <button onclick="mostrarSeccion('inicio')" 
+                class="relative py-2 hover:text-orange-400 transition-colors group">
+          Inicio
+          <span class="absolute bottom-0 left-0 h-[2px] w-0 bg-orange-400 group-hover:w-full transition-all duration-300"></span>
+        </button>
+        <button onclick="mostrarSeccion('catalogo')" 
+                class="relative py-2 hover:text-orange-400 transition-colors group">
+          Catálogo
+          <span class="absolute bottom-0 left-0 h-[2px] w-0 bg-orange-400 group-hover:w-full transition-all duration-300"></span>
+        </button>
       </nav>
 
+      <!-- Botones derecha -->
       <div class="flex items-center gap-4">
-        <button onclick="abrirLogin()" class="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3 rounded-3xl font-bold text-sm transition-all active:scale-95">
-          <i class="fa-solid fa-shield-halved"></i> Admin
+        <button onclick="abrirLogin()" 
+                class="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 px-6 py-3 rounded-3xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-orange-500/30">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span class="hidden sm:inline">Admin</span>
         </button>
-        <button onclick="toggleCart()" class="relative bg-zinc-900 hover:bg-zinc-800 p-4 rounded-3xl transition-all active:scale-95">
+
+        <button onclick="toggleCart()" 
+                class="relative bg-zinc-900 hover:bg-zinc-800 p-4 rounded-3xl transition-all active:scale-95">
           <i class="fa-solid fa-cart-shopping text-2xl"></i>
           <span id="cartCount" class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-2xl">0</span>
+        </button>
+
+        <!-- Hamburger Mobile -->
+        <button onclick="toggleMobileMenu()" 
+                class="md:hidden p-3 text-3xl text-white hover:text-orange-400 transition-colors">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- MENÚ MÓVIL -->
+    <div id="mobileMenu" class="hidden md:hidden bg-black/95 border-t border-zinc-800 py-6">
+      <div class="max-w-7xl mx-auto px-6 flex flex-col gap-3 text-lg font-semibold">
+        <button onclick="mostrarSeccion('inicio'); toggleMobileMenu()" 
+                class="flex items-center gap-4 px-6 py-5 hover:bg-zinc-900 rounded-3xl transition-colors">
+          <i class="fa-solid fa-house w-6"></i>
+          <span>Inicio</span>
+        </button>
+        <button onclick="mostrarSeccion('catalogo'); toggleMobileMenu()" 
+                class="flex items-center gap-4 px-6 py-5 hover:bg-zinc-900 rounded-3xl transition-colors">
+          <i class="fa-solid fa-store w-6"></i>
+          <span>Catálogo</span>
         </button>
       </div>
     </div>
