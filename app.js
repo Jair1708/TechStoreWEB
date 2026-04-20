@@ -23,17 +23,11 @@ async function cargarProductos() {
 function renderFiltrosCategorias() {
   const container = document.getElementById("categoriasFiltro");
   if (!container) return;
-
   const categorias = ['todos', ...new Set(productos.map(p => p.categoria).filter(c => c && c.trim() !== ''))];
-
   container.innerHTML = categorias.map(cat => {
     const active = cat === filtroActual;
     const label = cat === 'todos' ? '🌐 Todos' : cat;
-    return `
-      <button onclick="filtrarPorCategoria('${cat}')" 
-              class="px-7 py-3 rounded-3xl font-semibold text-sm transition-all ${active ? 'bg-orange-500 text-black shadow-lg' : 'bg-zinc-800 hover:bg-zinc-700'}">
-        ${label}
-      </button>`;
+    return `<button onclick="filtrarPorCategoria('${cat}')" class="px-7 py-3 rounded-3xl font-semibold text-sm transition-all ${active ? 'bg-orange-500 text-black shadow-lg' : 'bg-zinc-800 hover:bg-zinc-700'}">${label}</button>`;
   }).join('');
 }
 
@@ -43,20 +37,14 @@ window.filtrarPorCategoria = (cat) => {
   renderFiltrosCategorias();
 };
 
-// ==================== RENDER CATÁLOGO ====================
 function renderCatalogo() {
   const grid = document.getElementById("catalogoGrid");
   let filtered = productos;
-
-  if (filtroActual !== 'todos') {
-    filtered = productos.filter(p => p.categoria === filtroActual);
-  }
-
+  if (filtroActual !== 'todos') filtered = productos.filter(p => p.categoria === filtroActual);
   if (filtered.length === 0) {
     grid.innerHTML = `<div class="col-span-full text-center py-20"><p class="text-3xl text-zinc-400">No hay productos en esta categoría</p></div>`;
     return;
   }
-
   grid.innerHTML = filtered.map(p => `
     <div onclick="verProducto(${p.id})" class="cursor-pointer bg-zinc-900 rounded-3xl overflow-hidden hover:scale-105 transition-all">
       <img src="${p.imgs}" class="w-full h-56 object-cover">
@@ -69,11 +57,10 @@ function renderCatalogo() {
   `).join('');
 }
 
-// ==================== MODAL PRODUCTO ====================
+// ==================== MODAL ====================
 window.verProducto = function(id) {
   const p = productos.find(x => x.id === id);
   if (!p) return;
-
   document.getElementById("modalContent").innerHTML = `
     <button onclick="document.getElementById('modal').classList.add('hidden')" class="absolute top-4 right-4 text-4xl text-zinc-400 hover:text-white z-10">×</button>
     <div class="p-6 pt-12">
@@ -82,11 +69,7 @@ window.verProducto = function(id) {
       <h2 class="text-3xl font-bold mt-3">${p.nombre}</h2>
       <p class="text-orange-400 text-4xl font-bold mt-2">$${Number(p.precio).toLocaleString()}</p>
       <p class="mt-6 text-zinc-300 leading-relaxed">${p.descripcion || "Sin descripción"}</p>
-      
-      <button onclick="agregarAlCarrito(${p.id}); document.getElementById('modal').classList.add('hidden')" 
-              class="w-full mt-8 bg-orange-500 py-5 rounded-3xl font-bold text-xl">
-        🛒 Agregar al carrito
-      </button>
+      <button onclick="agregarAlCarrito(${p.id}); document.getElementById('modal').classList.add('hidden')" class="w-full mt-8 bg-orange-500 py-5 rounded-3xl font-bold text-xl">🛒 Agregar al carrito</button>
     </div>
   `;
   document.getElementById("modal").classList.remove("hidden");
@@ -106,9 +89,7 @@ window.login = () => {
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("adminPanel").classList.remove("hidden");
     renderAdminProductos();
-  } else {
-    alert("❌ Credenciales incorrectas");
-  }
+  } else alert("❌ Credenciales incorrectas");
 };
 
 window.cerrarAdminPanel = () => {
@@ -138,7 +119,6 @@ function renderAdminProductos() {
   `).join('');
 }
 
-// ==================== EDITAR / GUARDAR ====================
 window.editarProducto = function(id) {
   const p = productos.find(x => x.id === id);
   if (!p) return;
@@ -209,7 +189,7 @@ window.eliminarProducto = async (id) => {
   renderAdminProductos();
 };
 
-// ==================== CARRITO (AHORA COMPLETO) ====================
+// ==================== CARRITO ====================
 window.toggleCart = () => {
   const panel = document.getElementById("cartPanel");
   if (!panel) return console.error("❌ No se encontró #cartPanel");
@@ -239,30 +219,15 @@ function actualizarCarrito() {
 function renderCarrito() {
   const container = document.getElementById("cartItems");
   let total = 0;
-
   if (carrito.length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-12 text-zinc-400">
-        <p class="text-xl">Tu carrito está vacío</p>
-        <p class="text-sm mt-2">Agrega algunos gadgets premium 🔥</p>
-      </div>`;
+    container.innerHTML = `<div class="text-center py-12 text-zinc-400"><p class="text-xl">Tu carrito está vacío</p><p class="text-sm mt-2">Agrega algunos gadgets premium 🔥</p></div>`;
     document.getElementById("cartTotal").textContent = "$0";
     return;
   }
-
   container.innerHTML = carrito.map((p, i) => {
     total += Number(p.precio);
-    return `
-      <div class="flex gap-4 bg-zinc-800 p-4 rounded-2xl">
-        <img src="${p.imgs}" class="w-16 h-16 object-cover rounded-xl">
-        <div class="flex-1">
-          <h4 class="font-bold">${p.nombre}</h4>
-          <p class="text-orange-400">$${Number(p.precio).toLocaleString()}</p>
-        </div>
-        <button onclick="eliminarDelCarrito(${i})" class="text-red-500 hover:text-red-400">Eliminar</button>
-      </div>`;
+    return `<div class="flex gap-4 bg-zinc-800 p-4 rounded-2xl"><img src="${p.imgs}" class="w-16 h-16 object-cover rounded-xl"><div class="flex-1"><h4 class="font-bold">${p.nombre}</h4><p class="text-orange-400">$${Number(p.precio).toLocaleString()}</p></div><button onclick="eliminarDelCarrito(${i})" class="text-red-500 hover:text-red-400">Eliminar</button></div>`;
   }).join('');
-
   document.getElementById("cartTotal").textContent = "$" + total.toLocaleString();
 }
 
@@ -275,12 +240,8 @@ window.eliminarDelCarrito = (i) => {
 window.comprarPorWhatsApp = () => {
   if (carrito.length === 0) return alert("Carrito vacío");
   let total = carrito.reduce((acc, p) => acc + Number(p.precio), 0);
-  let msg = `🛒 *Pedido TechStore*%0A%0A`;
-  msg += carrito.map(p => `• ${p.nombre} - $${Number(p.precio).toLocaleString()}`).join("%0A");
-  msg += `%0A%0A*Total: $${total.toLocaleString()}*`;
-
+  let msg = `🛒 *Pedido TechStore*%0A%0A` + carrito.map(p => `• ${p.nombre} - $${Number(p.precio).toLocaleString()}`).join("%0A") + `%0A%0A*Total: $${total.toLocaleString()}*`;
   window.open(`https://wa.me/573505555883?text=${msg}`, "_blank");
-  
   carrito = [];
   localStorage.setItem("carrito", JSON.stringify(carrito));
   actualizarCarrito();
@@ -310,4 +271,5 @@ window.mostrarSeccion = (id) => {
 window.onload = () => {
   cargarProductos();
   actualizarCarrito();
+  console.log("✅ app.js cargado correctamente");
 };

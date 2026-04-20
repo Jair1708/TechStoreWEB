@@ -10,24 +10,17 @@
 </head>
 <body class="bg-zinc-950 text-white font-sans">
 
-  <!-- HEADER PROFESIONAL -->
+  <!-- HEADER -->
   <header class="bg-black/95 backdrop-blur-xl sticky top-0 z-50 border-b border-zinc-800">
     <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
       <div onclick="mostrarSeccion('inicio'); toggleMobileMenu()" class="flex items-center gap-3 cursor-pointer">
-        <img src="https://dlzerjvbqixllkkralfz.supabase.co/storage/v1/object/public/imagenes_productos/logo-techstore.png" 
-             alt="TechStore" class="h-10 w-auto">
+        <img src="https://dlzerjvbqixllkkralfz.supabase.co/storage/v1/object/public/imagenes_productos/logo-techstore.png" alt="TechStore" class="h-10 w-auto">
         <span class="text-3xl font-black tracking-[-2px] text-white">TECHSTORE</span>
       </div>
 
       <nav class="hidden md:flex items-center gap-10 text-sm font-semibold uppercase tracking-widest">
-        <button onclick="mostrarSeccion('inicio')" class="relative py-2 hover:text-orange-400 transition-colors group">
-          Inicio
-          <span class="absolute bottom-0 left-0 h-[2px] w-0 bg-orange-400 group-hover:w-full transition-all duration-300"></span>
-        </button>
-        <button onclick="mostrarSeccion('catalogo')" class="relative py-2 hover:text-orange-400 transition-colors group">
-          Catálogo
-          <span class="absolute bottom-0 left-0 h-[2px] w-0 bg-orange-400 group-hover:w-full transition-all duration-300"></span>
-        </button>
+        <button onclick="mostrarSeccion('inicio')" class="relative py-2 hover:text-orange-400 transition-colors group">Inicio<span class="absolute bottom-0 left-0 h-[2px] w-0 bg-orange-400 group-hover:w-full transition-all"></span></button>
+        <button onclick="mostrarSeccion('catalogo')" class="relative py-2 hover:text-orange-400 transition-colors group">Catálogo<span class="absolute bottom-0 left-0 h-[2px] w-0 bg-orange-400 group-hover:w-full transition-all"></span></button>
       </nav>
 
       <div class="flex items-center gap-4">
@@ -35,12 +28,10 @@
           <i class="fa-solid fa-shield-halved"></i>
           <span class="hidden sm:inline">Admin</span>
         </button>
-
         <button onclick="toggleCart()" class="relative bg-zinc-900 hover:bg-zinc-800 p-4 rounded-3xl transition-all active:scale-95">
           <i class="fa-solid fa-cart-shopping text-2xl"></i>
           <span id="cartCount" class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-2xl">0</span>
         </button>
-
         <button onclick="toggleMobileMenu()" class="md:hidden p-3 text-3xl text-white hover:text-orange-400 transition-colors">
           <i class="fa-solid fa-bars"></i>
         </button>
@@ -50,32 +41,92 @@
     <!-- MENÚ MÓVIL -->
     <div id="mobileMenu" class="hidden md:hidden bg-black/95 border-t border-zinc-800 py-6">
       <div class="max-w-7xl mx-auto px-6 flex flex-col gap-3 text-lg font-semibold">
-        <button onclick="mostrarSeccion('inicio'); toggleMobileMenu()" class="flex items-center gap-4 px-6 py-5 hover:bg-zinc-900 rounded-3xl transition-colors">
-          <i class="fa-solid fa-house w-6"></i><span>Inicio</span>
-        </button>
-        <button onclick="mostrarSeccion('catalogo'); toggleMobileMenu()" class="flex items-center gap-4 px-6 py-5 hover:bg-zinc-900 rounded-3xl transition-colors">
-          <i class="fa-solid fa-store w-6"></i><span>Catálogo</span>
-        </button>
+        <button onclick="mostrarSeccion('inicio'); toggleMobileMenu()" class="flex items-center gap-4 px-6 py-5 hover:bg-zinc-900 rounded-3xl transition-colors"><i class="fa-solid fa-house w-6"></i><span>Inicio</span></button>
+        <button onclick="mostrarSeccion('catalogo'); toggleMobileMenu()" class="flex items-center gap-4 px-6 py-5 hover:bg-zinc-900 rounded-3xl transition-colors"><i class="fa-solid fa-store w-6"></i><span>Catálogo</span></button>
       </div>
     </div>
   </header>
 
-  <!-- HERO - NUEVO ESTILO PREMIUM -->
+  <!-- HERO -->
   <section id="inicio" class="relative min-h-screen flex items-center overflow-hidden">
-    <img src="https://dlzerjvbqixllkkralfz.supabase.co/storage/v1/object/public/imagenes_productos/banner-hero.jpg" 
-         class="absolute inset-0 w-full h-full object-cover" alt="Banner">
-    
-    <!-- Nuevo gradiente más elegante y profesional -->
+    <img src="https://dlzerjvbqixllkkralfz.supabase.co/storage/v1/object/public/imagenes_productos/banner-hero.jpg" class="absolute inset-0 w-full h-full object-cover" alt="Banner">
     <div class="absolute inset-0 bg-gradient-to-br from-black/90 via-zinc-950/80 to-transparent"></div>
-    
     <div class="max-w-7xl mx-auto px-6 relative z-10">
       <div class="bg-black/70 backdrop-blur-2xl p-10 md:p-12 rounded-3xl max-w-xl border border-white/10">
-        <h1 class="text-6xl md:text-7xl font-black tracking-tighter leading-none">
-          TECHSTORE <span class="text-orange-400">🔥</span>
-        </h1>
+        <h1 class="text-6xl md:text-7xl font-black tracking-tighter leading-none">TECHSTORE <span class="text-orange-400">🔥</span></h1>
         <p class="text-3xl text-orange-300 mt-4">Gadgets Premium • Pago Contra Entrega</p>
         <p class="mt-6 text-zinc-300 text-lg">Envío rápido a todo Colombia • Garantía real • Calidad premium</p>
-        
-        <button onclick="mostrarSeccion('catalogo')" 
-                class="mt-10 bg-white text-black font-bold text-2xl px-12 py-6 rounded-3xl hover:scale-105 transition-all flex items-center gap-3">
-          <span>EXPLORAR CATÁLOGO</span>
+        <button onclick="mostrarSeccion('catalogo')" class="mt-10 bg-white text-black font-bold text-2xl px-12 py-6 rounded-3xl hover:scale-105 transition-all flex items-center gap-3">
+          EXPLORAR CATÁLOGO <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATÁLOGO -->
+  <section id="catalogo" class="max-w-7xl mx-auto px-6 py-16 hidden">
+    <div class="flex justify-between items-end mb-8">
+      <h2 class="text-5xl font-black">Catálogo</h2>
+    </div>
+    <div id="categoriasFiltro" class="flex gap-3 mb-10 flex-wrap"></div>
+    <div id="catalogoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+  </section>
+
+  <!-- MODAL, LOGIN, ADMIN, CARRITO y TOAST (sin cambios) -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100]">
+    <div id="modalContent" class="bg-zinc-900 w-full max-w-lg mx-4 rounded-3xl max-h-[90vh] overflow-y-auto relative"></div>
+  </div>
+
+  <div id="loginBox" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[200]">
+    <div class="bg-zinc-900 p-8 rounded-3xl w-full max-w-sm">
+      <div class="flex justify-end mb-4"><button onclick="document.getElementById('loginBox').classList.add('hidden')" class="text-4xl text-zinc-400 hover:text-orange-400">×</button></div>
+      <h2 class="text-3xl font-bold mb-6">Acceso Admin</h2>
+      <input id="user" type="email" placeholder="Email" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
+      <input id="pass" type="password" placeholder="Contraseña" class="w-full mb-6 px-6 py-4 bg-black rounded-2xl">
+      <button onclick="login()" class="w-full bg-orange-500 py-4 rounded-3xl font-bold">Entrar</button>
+    </div>
+  </div>
+
+  <div id="adminPanel" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[210] p-4 overflow-auto">
+    <div class="bg-zinc-900 w-full max-w-4xl rounded-3xl p-8">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold">Gestión de Productos</h2>
+        <button onclick="cerrarAdminPanel()" class="text-5xl leading-none text-zinc-400 hover:text-white">×</button>
+      </div>
+      <div class="mb-12 border border-zinc-700 rounded-3xl p-6">
+        <h3 id="formTitle" class="text-2xl font-bold mb-6">Nuevo Producto</h3>
+        <input id="pNombre" placeholder="Nombre del producto" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
+        <input id="pPrecio" type="number" placeholder="Precio" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
+        <input id="pCategoria" placeholder="Categoría (ej: Auriculares, Smartwatch)" class="w-full mb-4 px-6 py-4 bg-black rounded-2xl">
+        <textarea id="pDesc" placeholder="Descripción" rows="3" class="w-full mb-6 px-6 py-4 bg-black rounded-2xl"></textarea>
+        <input id="pArchivo" type="file" accept="image/*" class="w-full mb-6">
+        <div class="flex gap-3">
+          <button onclick="guardarProducto()" id="btnGuardar" class="flex-1 bg-orange-500 py-4 rounded-3xl font-bold">Publicar Producto</button>
+          <button onclick="cancelarEdicion()" class="flex-1 bg-zinc-800 py-4 rounded-3xl font-bold">Cancelar</button>
+        </div>
+      </div>
+      <h3 class="text-xl font-bold mb-4">Productos publicados</h3>
+      <div id="adminProductosList" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2"></div>
+    </div>
+  </div>
+
+  <div id="cartPanel" class="fixed top-0 right-0 h-full w-96 bg-zinc-900 border-l border-zinc-700 z-[300] translate-x-full transition-transform duration-300">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold">Tu Carrito</h2>
+        <button onclick="toggleCart()" class="text-5xl leading-none text-zinc-400 hover:text-orange-400 transition-colors">×</button>
+      </div>
+      <div id="cartItems" class="space-y-6"></div>
+      <div class="mt-8 border-t pt-6">
+        <div class="flex justify-between text-xl"><span>Total</span><span id="cartTotal" class="font-bold text-orange-400">$0</span></div>
+        <button onclick="comprarPorWhatsApp()" class="w-full mt-6 bg-green-500 py-5 rounded-3xl font-bold text-xl">Enviar por WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="hidden fixed bottom-8 left-1/2 -translate-x-1/2 bg-orange-500 text-black px-8 py-4 rounded-3xl font-bold"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
