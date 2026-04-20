@@ -43,7 +43,7 @@ window.filtrarPorCategoria = (cat) => {
   renderFiltrosCategorias();
 };
 
-// ==================== RENDER CATÁLOGO CON CATEGORÍAS ====================
+// ==================== RENDER CATÁLOGO ====================
 function renderCatalogo() {
   const grid = document.getElementById("catalogoGrid");
   let filtered = productos;
@@ -53,10 +53,7 @@ function renderCatalogo() {
   }
 
   if (filtered.length === 0) {
-    grid.innerHTML = `
-      <div class="col-span-full text-center py-20">
-        <p class="text-3xl text-zinc-400 mb-4">No hay productos en esta categoría</p>
-      </div>`;
+    grid.innerHTML = `<div class="col-span-full text-center py-20"><p class="text-3xl text-zinc-400">No hay productos en esta categoría</p></div>`;
     return;
   }
 
@@ -105,7 +102,6 @@ window.abrirLogin = () => document.getElementById("loginBox").classList.remove("
 window.login = () => {
   const email = document.getElementById("user").value.trim();
   const pass = document.getElementById("pass").value;
-
   if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("adminPanel").classList.remove("hidden");
@@ -126,7 +122,6 @@ function renderAdminProductos() {
     container.innerHTML = `<p class="text-zinc-400 text-center py-8">Aún no hay productos</p>`;
     return;
   }
-
   container.innerHTML = productos.map(p => `
     <div class="flex gap-4 bg-zinc-800 rounded-2xl p-4">
       <img src="${p.imgs}" class="w-20 h-20 object-cover rounded-xl">
@@ -147,11 +142,9 @@ function renderAdminProductos() {
 window.editarProducto = function(id) {
   const p = productos.find(x => x.id === id);
   if (!p) return;
-
   editingId = id;
   document.getElementById("formTitle").textContent = "Editar Producto";
   document.getElementById("btnGuardar").textContent = "Guardar Cambios";
-  
   document.getElementById("pNombre").value = p.nombre;
   document.getElementById("pPrecio").value = p.precio;
   document.getElementById("pCategoria").value = p.categoria || "";
@@ -187,12 +180,7 @@ window.guardarProducto = async () => {
     imageUrl = urlData.publicUrl;
   }
 
-  const productData = {
-    nombre,
-    precio: parseFloat(precio),
-    categoria: categoria || null,
-    descripcion
-  };
+  const productData = { nombre, precio: parseFloat(precio), categoria: categoria || null, descripcion };
 
   if (editingId) {
     if (imageUrl) productData.imgs = imageUrl;
@@ -212,7 +200,6 @@ window.guardarProducto = async () => {
   renderAdminProductos();
 };
 
-// ==================== ELIMINAR ====================
 window.eliminarProducto = async (id) => {
   if (!confirm("¿Seguro que quieres eliminar este producto?")) return;
   const { error } = await client.from('productos').delete().eq('id', id);
@@ -222,14 +209,91 @@ window.eliminarProducto = async (id) => {
   renderAdminProductos();
 };
 
-// ==================== CARRITO (sin cambios) ====================
-window.toggleCart = () => { /* ... mismo código anterior ... */ };
-window.agregarAlCarrito = (id) => { /* ... mismo ... */ };
-function actualizarCarrito() { /* ... */ }
-function renderCarrito() { /* ... */ }
-window.eliminarDelCarrito = (i) => { /* ... */ };
-window.comprarPorWhatsApp = () => { /* ... */ };
-function mostrarToast(msg) { /* ... */ };
+// ==================== CARRITO (AHORA COMPLETO) ====================
+window.toggleCart = () => {
+  const panel = document.getElementById("cartPanel");
+  if (!panel) return console.error("❌ No se encontró #cartPanel");
+  panel.classList.toggle("translate-x-full");
+  if (!panel.classList.contains("translate-x-full")) {
+    panel.style.boxShadow = "-10px 0 30px -10px rgb(249 115 22 / 0.3)";
+  } else {
+    panel.style.boxShadow = "";
+  }
+};
+
+window.agregarAlCarrito = (id) => {
+  const p = productos.find(prod => prod.id === id);
+  if (p) {
+    carrito.push(p);
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+    actualizarCarrito();
+    mostrarToast("✅ Agregado al carrito");
+  }
+};
+
+function actualizarCarrito() {
+  document.getElementById("cartCount").textContent = carrito.length;
+  renderCarrito();
+}
+
+function renderCarrito() {
+  const container = document.getElementById("cartItems");
+  let total = 0;
+
+  if (carrito.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-12 text-zinc-400">
+        <p class="text-xl">Tu carrito está vacío</p>
+        <p class="text-sm mt-2">Agrega algunos gadgets premium 🔥</p>
+      </div>`;
+    document.getElementById("cartTotal").textContent = "$0";
+    return;
+  }
+
+  container.innerHTML = carrito.map((p, i) => {
+    total += Number(p.precio);
+    return `
+      <div class="flex gap-4 bg-zinc-800 p-4 rounded-2xl">
+        <img src="${p.imgs}" class="w-16 h-16 object-cover rounded-xl">
+        <div class="flex-1">
+          <h4 class="font-bold">${p.nombre}</h4>
+          <p class="text-orange-400">$${Number(p.precio).toLocaleString()}</p>
+        </div>
+        <button onclick="eliminarDelCarrito(${i})" class="text-red-500 hover:text-red-400">Eliminar</button>
+      </div>`;
+  }).join('');
+
+  document.getElementById("cartTotal").textContent = "$" + total.toLocaleString();
+}
+
+window.eliminarDelCarrito = (i) => {
+  carrito.splice(i, 1);
+  localStorage.setItem("carrito", JSON.stringify(carrito));
+  actualizarCarrito();
+};
+
+window.comprarPorWhatsApp = () => {
+  if (carrito.length === 0) return alert("Carrito vacío");
+  let total = carrito.reduce((acc, p) => acc + Number(p.precio), 0);
+  let msg = `🛒 *Pedido TechStore*%0A%0A`;
+  msg += carrito.map(p => `• ${p.nombre} - $${Number(p.precio).toLocaleString()}`).join("%0A");
+  msg += `%0A%0A*Total: $${total.toLocaleString()}*`;
+
+  window.open(`https://wa.me/573505555883?text=${msg}`, "_blank");
+  
+  carrito = [];
+  localStorage.setItem("carrito", JSON.stringify(carrito));
+  actualizarCarrito();
+  toggleCart();
+  mostrarToast("✅ Pedido enviado por WhatsApp");
+};
+
+function mostrarToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.remove("hidden");
+  setTimeout(() => t.classList.add("hidden"), 2800);
+}
 
 // ==================== MENÚ MÓVIL ====================
 window.toggleMobileMenu = () => {
